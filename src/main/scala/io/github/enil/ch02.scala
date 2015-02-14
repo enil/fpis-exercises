@@ -7,22 +7,19 @@ package io.github.enil
  */
 object Exercise21 {
   def main(args: Array[String]): Unit = {
-    // print the n first number in the fibonacci sequence
-    def loop(c: Int, n: Int): Unit =
-      if (c < n) {
-        println(s"fib($c) = ${fib(c)}")
-        loop(c + 1, n)
-      }
-
-    loop(0, 20)
+    assert(fib(0) == 0)
+    assert(fib(1) == 1)
+    assert(fib(2) == 1)
+    assert(fib(3) == 2)
+    assert(fib(4) == 3)
+    assert(fib(5) == 5)
+    assert(fib(6) == 8)
+    assert(fib(7) == 13)
+    assert(fib(8) == 21)
+    assert(fib(9) == 34)
+    assert(fib(10) == 55)
   }
 
-  /**
-   * Calculate the nth number in the fibonacci sequence.
-   *
-   * @param n an index in the fibonacci sequence
-   * @return the nth fibonacci number.
-   */
   def fib(n: Int): Int = {
     def go(c: Int, n: Int, left: Int, right: Int): (Int, Int) =
       if (c < n) {
@@ -38,7 +35,7 @@ object Exercise21 {
 }
 
 /**
- * Exercise 2.2: implement isSorted
+ * Exercise 2.2: implement isSorted.
  *
  * @author Emil Nilsson
  */
@@ -60,14 +57,6 @@ object Exercise22 {
     assert(isSorted(Array("bar", "baz", "foo", "baz"), ltString) == false)
   }
 
-  /**
-   * Checks whether an array is sorted according to a comparison function.
-   *
-   * @param as an array
-   * @param ordered a comparison function
-   * @tparam A the element type of the array
-   * @return true if the array is sorted according to the function
-   */
   def isSorted[A](as: Array[A], ordered: (A, A) => Boolean): Boolean = {
     def go(n: Int, o: Boolean): Boolean =
       if (!o) false
@@ -79,7 +68,7 @@ object Exercise22 {
 }
 
 /**
- * Exercise 2.3: implement curry
+ * Exercise 2.3: implement curry.
  *
  * @author Emil Nilsson
  */
@@ -89,16 +78,21 @@ object Exercise23 {
     assert(f(7) == 42)
   }
 
-  /**
-   * Returns a function currying function for a function with 2 parameters.
-   *
-   * @param f the function to curry
-   * @tparam A the type of the first parameter
-   * @tparam B the type of the second parameter
-   * @tparam C the type of the return value
-   * @return a curried function
-   */
-  def curry[A,B,C](f: (A, B) => C): A => (B => C) = {
+  def curry[A, B, C](f: (A, B) => C): A => (B => C) =
     (a: A) => (b: B) => f(a, b)
+}
+
+/**
+ * Exercise 2.4: implement uncurry.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise24 {
+  def main(args: Array[String]) {
+    val f = (a: Int) => (b: Int) => a * b
+    assert(uncurry(f)(6, 7) == 42)
   }
+
+  def uncurry[A, B, C](f: A => B => C): (A, B) => C =
+    (a: A, b: B) => f(a)(b)
 }
