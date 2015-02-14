@@ -77,3 +77,28 @@ object Exercise22 {
     go(0, true)
   }
 }
+
+/**
+ * Exercise 2.3: implement curry
+ *
+ * @author Emil Nilsson
+ */
+object Exercise23 {
+  def main(args: Array[String]): Unit = {
+    val f = curry((a: Int, b: Int) => a * b)(6)
+    assert(f(7) == 42)
+  }
+
+  /**
+   * Returns a function currying function for a function with 2 parameters.
+   *
+   * @param f the function to curry
+   * @tparam A the type of the first parameter
+   * @tparam B the type of the second parameter
+   * @tparam C the type of the return value
+   * @return a curried function
+   */
+  def curry[A,B,C](f: (A, B) => C): A => (B => C) = {
+    (a: A) => (b: B) => f(a, b)
+  }
+}
