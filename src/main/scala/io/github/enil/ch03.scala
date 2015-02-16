@@ -24,7 +24,7 @@ case object Nil extends List[Nothing]
 
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
-object List {
+object List extends Exercise32.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -39,4 +39,24 @@ object List {
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
+}
+
+/**
+ * Exercise 3.2: implement List.tail.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise32 {
+  def main(args: Array[String]): Unit = {
+    assert(List.tail(List.apply(1, 2, 3)) == List.apply(2, 3))
+    assert(List.tail(List.apply(1)) == Nil)
+    assert(List.tail(Nil) == Nil)
+  }
+
+  trait ListExtension {
+    def tail[A](as: List[A]): List[A] = as match {
+      case Cons(x, xs) => xs
+      case _ => Nil
+    }
+  }
 }
