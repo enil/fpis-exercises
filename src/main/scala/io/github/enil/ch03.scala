@@ -24,7 +24,8 @@ case object Nil extends List[Nothing]
 
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
-object List extends Exercise32.ListExtension {
+object List extends Exercise32.ListExtension
+with Exercise33.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -57,6 +58,27 @@ object Exercise32 {
     def tail[A](as: List[A]): List[A] = as match {
       case Cons(x, xs) => xs
       case _ => Nil
+    }
+  }
+
+}
+
+/**
+ * Exercise 3.3: implement List.setHead.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise33 {
+  def main(args: Array[String]) {
+    assert(List.setHead(List.apply(1, 2, 3), 4) == List.apply(4, 2, 3))
+    assert(List.setHead(List.apply(1), 2) == List.apply(2))
+    assert(List.setHead(Nil, 1) == List.apply(1))
+  }
+
+  trait ListExtension {
+    def setHead[A](as: List[A], a: A): List[A] = as match {
+      case Cons(x, xs) => Cons(a, xs)
+      case _ => Cons(a, Nil)
     }
   }
 }
