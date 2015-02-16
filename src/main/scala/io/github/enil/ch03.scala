@@ -25,7 +25,8 @@ case object Nil extends List[Nothing]
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
 object List extends Exercise32.ListExtension
-with Exercise33.ListExtension {
+with Exercise33.ListExtension
+with Exercise34.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -79,6 +80,29 @@ object Exercise33 {
     def setHead[A](as: List[A], a: A): List[A] = as match {
       case Cons(x, xs) => Cons(a, xs)
       case _ => Cons(a, Nil)
+    }
+  }
+}
+
+/**
+ * Exercise 3.4: implement List.drop.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise34 {
+  def main(args: Array[String]): Unit = {
+    assert(List.drop(List.apply(1, 2, 3), 2) == List.apply(3))
+    assert(List.drop(List.apply(1, 2, 3), 4) == Nil)
+    assert(List.drop(List.apply(1), 0) == List.apply(1))
+  }
+
+  trait ListExtension {
+    def drop[A](l: List[A], n: Int): List[A] = {
+      if (n == 0) l
+      else l match {
+        case Nil => Nil
+        case Cons(x, xs) => drop(xs, n-1)
+      }
     }
   }
 }
