@@ -28,7 +28,8 @@ object List extends Exercise32.ListExtension
 with Exercise33.ListExtension
 with Exercise34.ListExtension
 with Exercise35.ListExtension
-with Exercise36.ListExtension {
+with Exercise36.ListExtension
+with Exercise39.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -152,5 +153,23 @@ object Exercise36 {
       case Cons(x, Nil) => Nil
       case Cons(x, xs) => Cons(x, init(xs))
     }
+  }
+}
+
+/**
+ * Exercise 3.9: implement List.length with foldRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise39 {
+  def main(args: Array[String]): Unit = {
+    assert(List.length(List.apply(1, 2, 3)) == 3)
+    assert(List.length(List.apply(1)) == 1)
+    assert(List.length(Nil) == 0)
+  }
+
+  trait ListExtension {
+    def length[A](as: List[A]): Int =
+      List.foldRight(as, 0)((_, x) => x + 1)
   }
 }
