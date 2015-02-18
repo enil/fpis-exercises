@@ -30,7 +30,8 @@ with Exercise34.ListExtension
 with Exercise35.ListExtension
 with Exercise36.ListExtension
 with Exercise39.ListExtension
-with Exercise310.ListExtension {
+with Exercise310.ListExtension
+with Exercise311.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -46,7 +47,7 @@ with Exercise310.ListExtension {
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
 
-  def foldRight[A,B](as: List[A],z: B)(f: (A, B) => B): B = as match {
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
     case Nil => z
     case Cons(x, xs) => f(x, foldRight(xs, z)(f))
   }
@@ -70,7 +71,6 @@ object Exercise32 {
       case _ => Nil
     }
   }
-
 }
 
 /**
@@ -110,7 +110,7 @@ object Exercise34 {
       if (n == 0) l
       else l match {
         case Nil => Nil
-        case Cons(x, xs) => drop(xs, n-1)
+        case Cons(x, xs) => drop(xs, n - 1)
       }
     }
   }
@@ -176,7 +176,7 @@ object Exercise39 {
 }
 
 /**
- * Exercise 3.10: implement foldLeft.
+ * Exercise 3.10: implement List.foldLeft.
  *
  * @author Emil Nilsson
  */
@@ -192,5 +192,28 @@ object Exercise310 {
       case Nil => z
       case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
     }
+  }
+}
+
+/**
+ * Exercise 3.11: implement List.sum and List.product with foldLeft.
+ *
+ * List.sum and List.product are renamed as sum2 and product not to clash with the functions in List.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise311 {
+  def main(args: Array[String]): Unit = {
+    assert(List.sum2(List.apply(1, 2, 3)) == 6)
+    assert(List.product2(List.apply(6.0, 7.0)) == 42.0)
+    assert(List.sum2(Nil) == 0)
+  }
+
+  trait ListExtension extends Exercise310.ListExtension {
+    def sum2(ns: List[Int]): Int =
+      foldLeft(ns, 0)(_ + _)
+
+    def product2(ns: List[Double]): Double =
+      foldLeft(ns, 1.0)(_ * _)
   }
 }
