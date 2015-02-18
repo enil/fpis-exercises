@@ -32,7 +32,8 @@ with Exercise36.ListExtension
 with Exercise39.ListExtension
 with Exercise310.ListExtension
 with Exercise311.ListExtension
-with Exercise312.ListExtension {
+with Exercise312.ListExtension
+with Exercise314.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -233,5 +234,22 @@ object Exercise312 {
   trait ListExtension extends Exercise310.ListExtension {
     def reverse[A](as: List[A]): List[A] =
       List.foldLeft(as, Nil:List[A])((xs, x) => Cons(x, xs))
+  }
+}
+
+/**
+ * Exercise 3.14: implement List.append using foldRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise314 {
+  def main(args: Array[String]) {
+    assert(List.apply(List.apply(1, 2, 3), 4) == List.apply(1, 2, 3, 4))
+    assert(List.apply(Nil, 1) == List.apply(1))
+  }
+
+  trait ListExtension extends Exercise310.ListExtension {
+    def append[A](as: List[A], a: A): List[A] =
+      List.foldRight(as, Cons(a, Nil))((x, xs) => Cons(x, xs))
   }
 }
