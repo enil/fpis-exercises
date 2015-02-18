@@ -31,7 +31,8 @@ with Exercise35.ListExtension
 with Exercise36.ListExtension
 with Exercise39.ListExtension
 with Exercise310.ListExtension
-with Exercise311.ListExtension {
+with Exercise311.ListExtension
+with Exercise312.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -215,5 +216,22 @@ object Exercise311 {
 
     def product2(ns: List[Double]): Double =
       foldLeft(ns, 1.0)(_ * _)
+  }
+}
+
+/**
+ * Exercise 3.12: implement List.reverse.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise312 {
+  def main(args: Array[String]): Unit = {
+    assert(List.reverse(List.apply(1, 2, 3)) == List.apply(3, 2, 1))
+    assert(List.reverse(Nil) == Nil)
+  }
+
+  trait ListExtension extends Exercise310.ListExtension {
+    def reverse[A](as: List[A]): List[A] =
+      List.foldLeft(as, Nil:List[A])((xs, x) => Cons(x, xs))
   }
 }
