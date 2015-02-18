@@ -29,7 +29,8 @@ with Exercise33.ListExtension
 with Exercise34.ListExtension
 with Exercise35.ListExtension
 with Exercise36.ListExtension
-with Exercise39.ListExtension {
+with Exercise39.ListExtension
+with Exercise310.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -171,5 +172,25 @@ object Exercise39 {
   trait ListExtension {
     def length[A](as: List[A]): Int =
       List.foldRight(as, 0)((_, x) => x + 1)
+  }
+}
+
+/**
+ * Exercise 3.10: implement foldLeft.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise310 {
+  def main(args: Array[String]) {
+    assert(List.foldLeft(List.apply(1, 2, 3), 0.0)(_ + _) == 6)
+    assert(List.foldLeft(List.apply(6, 7), 1.0)(_ * _) == 42)
+    assert(List.foldLeft(Nil:List[Double], 0.0)(_ + _) == 0.0)
+  }
+
+  trait ListExtension {
+    def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
+      case Nil => z
+      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+    }
   }
 }
