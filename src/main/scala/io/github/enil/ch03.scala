@@ -67,8 +67,8 @@ with Exercise320.ListExtension {
  */
 object Exercise32 {
   def main(args: Array[String]): Unit = {
-    assert(List.tail(List.apply(1, 2, 3)) == List.apply(2, 3))
-    assert(List.tail(List.apply(1)) == Nil)
+    assert(List.tail(List(1, 2, 3)) == List(2, 3))
+    assert(List.tail(List(1)) == Nil)
     assert(List.tail(Nil) == Nil)
   }
 
@@ -87,9 +87,9 @@ object Exercise32 {
  */
 object Exercise33 {
   def main(args: Array[String]) {
-    assert(List.setHead(List.apply(1, 2, 3), 4) == List.apply(4, 2, 3))
-    assert(List.setHead(List.apply(1), 2) == List.apply(2))
-    assert(List.setHead(Nil, 1) == List.apply(1))
+    assert(List.setHead(List(1, 2, 3), 4) == List(4, 2, 3))
+    assert(List.setHead(List(1), 2) == List(2))
+    assert(List.setHead(Nil, 1) == List(1))
   }
 
   trait ListExtension {
@@ -107,9 +107,9 @@ object Exercise33 {
  */
 object Exercise34 {
   def main(args: Array[String]): Unit = {
-    assert(List.drop(List.apply(1, 2, 3), 2) == List.apply(3))
-    assert(List.drop(List.apply(1, 2, 3), 4) == Nil)
-    assert(List.drop(List.apply(1), 0) == List.apply(1))
+    assert(List.drop(List(1, 2, 3), 2) == List(3))
+    assert(List.drop(List(1, 2, 3), 4) == Nil)
+    assert(List.drop(List(1), 0) == List(1))
   }
 
   trait ListExtension {
@@ -130,8 +130,8 @@ object Exercise34 {
  */
 object Exercise35 {
   def main(args: Array[String]): Unit = {
-    assert(List.dropWhile(List.apply(1, 2, 3), (x: Int) => x < 3) == List.apply(3))
-    assert(List.dropWhile(List.apply(1, 2, 3), (x: Int) => x > 3) == List.apply(1, 2, 3))
+    assert(List.dropWhile(List(1, 2, 3), (x: Int) => x < 3) == List(3))
+    assert(List.dropWhile(List(1, 2, 3), (x: Int) => x > 3) == List(1, 2, 3))
     assert(List.dropWhile(Nil, (x: Int) => x < 3) == Nil)
   }
 
@@ -150,8 +150,8 @@ object Exercise35 {
  */
 object Exercise36 {
   def main(args: Array[String]): Unit = {
-    assert(List.init(List.apply(1, 2, 3)) == List.apply(1, 2))
-    assert(List.init(List.apply(1)) == Nil)
+    assert(List.init(List(1, 2, 3)) == List(1, 2))
+    assert(List.init(List(1)) == Nil)
     assert(List.init(Nil) == Nil)
   }
 
@@ -171,8 +171,8 @@ object Exercise36 {
  */
 object Exercise39 {
   def main(args: Array[String]): Unit = {
-    assert(List.length(List.apply(1, 2, 3)) == 3)
-    assert(List.length(List.apply(1)) == 1)
+    assert(List.length(List(1, 2, 3)) == 3)
+    assert(List.length(List(1)) == 1)
     assert(List.length(Nil) == 0)
   }
 
@@ -189,8 +189,8 @@ object Exercise39 {
  */
 object Exercise310 {
   def main(args: Array[String]) {
-    assert(List.foldLeft(List.apply(1, 2, 3), 0.0)(_ + _) == 6)
-    assert(List.foldLeft(List.apply(6, 7), 1.0)(_ * _) == 42)
+    assert(List.foldLeft(List(1, 2, 3), 0.0)(_ + _) == 6)
+    assert(List.foldLeft(List(6, 7), 1.0)(_ * _) == 42)
     assert(List.foldLeft(Nil:List[Double], 0.0)(_ + _) == 0.0)
   }
 
@@ -211,8 +211,8 @@ object Exercise310 {
  */
 object Exercise311 {
   def main(args: Array[String]): Unit = {
-    assert(List.sum2(List.apply(1, 2, 3)) == 6)
-    assert(List.product2(List.apply(6.0, 7.0)) == 42.0)
+    assert(List.sum2(List(1, 2, 3)) == 6)
+    assert(List.product2(List(6.0, 7.0)) == 42.0)
     assert(List.sum2(Nil) == 0)
   }
 
@@ -232,7 +232,7 @@ object Exercise311 {
  */
 object Exercise312 {
   def main(args: Array[String]): Unit = {
-    assert(List.reverse(List.apply(1, 2, 3)) == List.apply(3, 2, 1))
+    assert(List.reverse(List(1, 2, 3)) == List(3, 2, 1))
     assert(List.reverse(Nil) == Nil)
   }
 
@@ -249,8 +249,8 @@ object Exercise312 {
  */
 object Exercise314 {
   def main(args: Array[String]) {
-    assert(List.apply(List.apply(1, 2, 3), 4) == List.apply(1, 2, 3, 4))
-    assert(List.apply(Nil, 1) == List.apply(1))
+    assert(List(List(1, 2, 3), 4) == List(1, 2, 3, 4))
+    assert(List(Nil, 1) == List(1))
   }
 
   trait ListExtension extends Exercise310.ListExtension {
@@ -266,7 +266,7 @@ object Exercise314 {
  */
 object Exercise316 {
   def main(args: Array[String]): Unit = {
-    assert(List.increase(List.apply(1, 2, 3)) == List.apply(2, 3, 4))
+    assert(List.increase(List(1, 2, 3)) == List(2, 3, 4))
     assert(List.increase(Nil) == Nil)
   }
 
@@ -285,7 +285,7 @@ object Exercise316 {
  */
 object Exercise317 {
   def main(args: Array[String]): Unit = {
-    assert(List.doublesToStrings(List.apply(1.0, 2.0, 3.0)) == List.apply("1.0", "2.0", "3.0"))
+    assert(List.doublesToStrings(List(1.0, 2.0, 3.0)) == List("1.0", "2.0", "3.0"))
     assert(List.doublesToStrings(Nil) == Nil)
   }
 
@@ -304,8 +304,8 @@ object Exercise317 {
  */
 object Exercise318 {
   def main(args: Array[String]): Unit = {
-    assert(List.map(List.apply(1, 2, 3))(_.toString) == List.apply("1", "2", "3"))
-    assert(List.map(List.apply(1, 2, 3))(_ + 1) == List.apply(2, 3, 4))
+    assert(List.map(List(1, 2, 3))(_.toString) == List("1", "2", "3"))
+    assert(List.map(List(1, 2, 3))(_ + 1) == List(2, 3, 4))
     assert(List.map(Nil)(_.toString) == Nil)
   }
 
@@ -324,8 +324,8 @@ object Exercise318 {
  */
 object Exercise319 {
   def main(args: Array[String]): Unit = {
-    assert(List.filter(List.apply(1, 2, 3, 4, 5))(_ % 2 == 0) == List.apply(2, 4))
-    assert(List.filter(List.apply(1, 3, 5, 7))(_ % 2 == 0) == Nil)
+    assert(List.filter(List(1, 2, 3, 4, 5))(_ % 2 == 0) == List(2, 4))
+    assert(List.filter(List(1, 3, 5, 7))(_ % 2 == 0) == Nil)
     assert(List.filter(Nil)(_ => false) == Nil)
   }
 
