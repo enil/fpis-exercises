@@ -33,7 +33,8 @@ with Exercise39.ListExtension
 with Exercise310.ListExtension
 with Exercise311.ListExtension
 with Exercise312.ListExtension
-with Exercise314.ListExtension {
+with Exercise314.ListExtension
+with Exercise316.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -251,5 +252,24 @@ object Exercise314 {
   trait ListExtension extends Exercise310.ListExtension {
     def append[A](as: List[A], a: A): List[A] =
       List.foldRight(as, Cons(a, Nil))((x, xs) => Cons(x, xs))
+  }
+}
+
+/**
+ * Exercise 3.16: implement List.increase.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise316 {
+  def main(args: Array[String]): Unit = {
+    assert(List.increase(List.apply(1, 2, 3)) == List.apply(2, 3, 4))
+    assert(List.increase(Nil) == Nil)
+  }
+
+  trait ListExtension {
+    def increase(ns: List[Int]): List[Int] = ns match {
+      case Nil => Nil
+      case Cons(x, xs) => Cons(x + 1, increase(xs))
+    }
   }
 }
