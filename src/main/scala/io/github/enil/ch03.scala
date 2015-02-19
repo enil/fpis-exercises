@@ -34,7 +34,8 @@ with Exercise310.ListExtension
 with Exercise311.ListExtension
 with Exercise312.ListExtension
 with Exercise314.ListExtension
-with Exercise316.ListExtension {
+with Exercise316.ListExtension
+with Exercise317.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -270,6 +271,25 @@ object Exercise316 {
     def increase(ns: List[Int]): List[Int] = ns match {
       case Nil => Nil
       case Cons(x, xs) => Cons(x + 1, increase(xs))
+    }
+  }
+}
+
+/**
+ * Exercise 3.17: implement List.doublesToStrings.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise317 {
+  def main(args: Array[String]): Unit = {
+    assert(List.doublesToStrings(List.apply(1.0, 2.0, 3.0)) == List.apply("1.0", "2.0", "3.0"))
+    assert(List.doublesToStrings(Nil) == Nil)
+  }
+
+  trait ListExtension {
+    def doublesToStrings(ns: List[Double]): List[String] = ns match {
+      case Nil => Nil
+      case Cons(x, xs) => Cons(x.toString, doublesToStrings(xs))
     }
   }
 }
