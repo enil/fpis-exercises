@@ -37,7 +37,8 @@ with Exercise314.ListExtension
 with Exercise316.ListExtension
 with Exercise317.ListExtension
 with Exercise318.ListExtension
-with Exercise319.ListExtension {
+with Exercise319.ListExtension
+with Exercise320.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -332,6 +333,33 @@ object Exercise319 {
     def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
       case Nil => Nil
       case Cons(x, xs) => if (f(x)) Cons(x, filter(xs)(f)) else filter(xs)(f)
+    }
+  }
+}
+
+/**
+ * Exercise 3.20: implement List.flatMap.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise320 {
+  def main(args: Array[String]): Unit = {
+    assert(List.flatMap(List(1, 2, 3))(i => List(i, i)) == List(1, 1, 2, 2, 3, 3))
+    assert(List.flatMap(List(1, 2, 3))(_ => Nil) == Nil)
+    assert(List.flatMap(Nil)(_ => Nil) == Nil)
+  }
+
+  trait ListExtension {
+    def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = {
+      def concat(l: List[B], r: List[B]): List[B] = l match {
+        case Nil => r
+        case Cons(x, xs) => Cons(x, concat(xs, r))
+      }
+
+      as match {
+        case Nil => Nil
+        case Cons(x, xs) => concat(f(x), flatMap(xs)(f))
+      }
     }
   }
 }
