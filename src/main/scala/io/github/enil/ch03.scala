@@ -35,7 +35,8 @@ with Exercise311.ListExtension
 with Exercise312.ListExtension
 with Exercise314.ListExtension
 with Exercise316.ListExtension
-with Exercise317.ListExtension {
+with Exercise317.ListExtension
+with Exercise318.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -290,6 +291,26 @@ object Exercise317 {
     def doublesToStrings(ns: List[Double]): List[String] = ns match {
       case Nil => Nil
       case Cons(x, xs) => Cons(x.toString, doublesToStrings(xs))
+    }
+  }
+}
+
+/**
+ * Exercise 3.18: implement List.map.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise318 {
+  def main(args: Array[String]): Unit = {
+    assert(List.map(List.apply(1, 2, 3))(_.toString) == List.apply("1", "2", "3"))
+    assert(List.map(List.apply(1, 2, 3))(_ + 1) == List.apply(2, 3, 4))
+    assert(List.map(Nil)(_.toString) == Nil)
+  }
+
+  trait ListExtension {
+    def map[A, B](as: List[A])(f: A => B): List[B] = as match {
+      case Nil => Nil
+      case Cons(x, xs) => Cons(f(x), map(xs)(f))
     }
   }
 }
