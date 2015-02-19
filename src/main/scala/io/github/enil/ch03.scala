@@ -36,7 +36,8 @@ with Exercise312.ListExtension
 with Exercise314.ListExtension
 with Exercise316.ListExtension
 with Exercise317.ListExtension
-with Exercise318.ListExtension {
+with Exercise318.ListExtension
+with Exercise319.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -311,6 +312,26 @@ object Exercise318 {
     def map[A, B](as: List[A])(f: A => B): List[B] = as match {
       case Nil => Nil
       case Cons(x, xs) => Cons(f(x), map(xs)(f))
+    }
+  }
+}
+
+/**
+ * Exercise 3.19: implement List.filter.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise319 {
+  def main(args: Array[String]): Unit = {
+    assert(List.filter(List.apply(1, 2, 3, 4, 5))(_ % 2 == 0) == List.apply(2, 4))
+    assert(List.filter(List.apply(1, 3, 5, 7))(_ % 2 == 0) == Nil)
+    assert(List.filter(Nil)(_ => false) == Nil)
+  }
+
+  trait ListExtension {
+    def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
+      case Nil => Nil
+      case Cons(x, xs) => if (f(x)) Cons(x, filter(xs)(f)) else filter(xs)(f)
     }
   }
 }
