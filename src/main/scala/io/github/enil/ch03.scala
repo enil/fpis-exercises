@@ -38,7 +38,8 @@ with Exercise316.ListExtension
 with Exercise317.ListExtension
 with Exercise318.ListExtension
 with Exercise319.ListExtension
-with Exercise320.ListExtension {
+with Exercise320.ListExtension
+with Exercise321.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -165,7 +166,7 @@ object Exercise36 {
 }
 
 /**
- * Exercise 3.9: implement List.length with foldRight.
+ * Exercise 3.9: implement List.length using foldRight.
  *
  * @author Emil Nilsson
  */
@@ -203,7 +204,7 @@ object Exercise310 {
 }
 
 /**
- * Exercise 3.11: implement List.sum and List.product with foldLeft.
+ * Exercise 3.11: implement List.sum and List.product using foldLeft.
  *
  * List.sum and List.product are renamed as sum2 and product not to clash with the functions in List.
  *
@@ -361,5 +362,23 @@ object Exercise320 {
         case Cons(x, xs) => concat(f(x), flatMap(xs)(f))
       }
     }
+  }
+}
+
+/**
+ * Exercise 3.21: implement List.filter using flatMap.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise321 {
+  def main(args: Array[String]) {
+    assert(List.filter2(List(1, 2, 3, 4, 5))(_ % 2 == 0) == List(2, 4))
+    assert(List.filter2(List(1, 3, 5, 7))(_ % 2 == 0) == Nil)
+    assert(List.filter2(Nil)(_ => false) == Nil)
+  }
+
+  trait ListExtension extends Exercise320.ListExtension {
+    def filter2[A](as: List[A])(f: A => Boolean): List[A] =
+      flatMap(as)(a => if (f(a)) List(a) else Nil)
   }
 }
