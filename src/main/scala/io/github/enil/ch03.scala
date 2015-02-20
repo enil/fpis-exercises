@@ -40,7 +40,8 @@ with Exercise318.ListExtension
 with Exercise319.ListExtension
 with Exercise320.ListExtension
 with Exercise321.ListExtension
-with Exercise322.ListExtension {
+with Exercise322.ListExtension
+with Exercise323.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -400,6 +401,27 @@ object Exercise322 {
   trait ListExtension {
     def addInts(ls: List[Int], rs: List[Int]): List[Int] = (ls, rs) match {
       case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addInts(xs, ys))
+      case _ => Nil
+    }
+  }
+}
+
+/**
+ * Exercise 3.23: implement List.zipWith.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise323 {
+  def main (args: Array[String]): Unit = {
+    assert(List.zipWith(List(1, 2, 3), List(4, 5, 6))(_ + _) == List(5, 7, 9))
+    assert(List.zipWith(List("foo", "bar"), List(1, 2, 3))(_ + _.toString) == List("foo1", "bar2"))
+    assert(List.zipWith(List("foo", "bar"), Nil)(_ + _.toString) == Nil)
+    assert(List.zipWith(Nil:List[String], Nil:List[Any])(_ + _.toString) == Nil)
+  }
+
+  trait ListExtension {
+    def zipWith[A, B, C](ls: List[A], rs: List[B])(f: (A, B) => C): List[C] = (ls, rs) match {
+      case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
       case _ => Nil
     }
   }
