@@ -41,7 +41,8 @@ with Exercise319.ListExtension
 with Exercise320.ListExtension
 with Exercise321.ListExtension
 with Exercise322.ListExtension
-with Exercise323.ListExtension {
+with Exercise323.ListExtension
+with Exercise324.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -423,6 +424,39 @@ object Exercise323 {
     def zipWith[A, B, C](ls: List[A], rs: List[B])(f: (A, B) => C): List[C] = (ls, rs) match {
       case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
       case _ => Nil
+    }
+  }
+}
+
+/**
+ * Exercise 3.24: implement List.hasSubsequence.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise324 {
+  def main(args: Array[String]): Unit = {
+    assert(List.hasSubsequence(List(1, 2, 3, 4), List(1, 2)) == true)
+    assert(List.hasSubsequence(List(1, 2, 3, 4), List(2, 3)) == true)
+    assert(List.hasSubsequence(List(1, 2, 3, 4), List(4)) == true)
+    assert(List.hasSubsequence(List(1, 2, 3, 4), List(4, 3)) == false)
+    assert(List.hasSubsequence(List(1, 2, 3, 4), List(1, 4)) == false)
+    assert(List.hasSubsequence(List(1, 2, 3, 4), Nil) == true)
+    assert(List.hasSubsequence(Nil, Nil) == true)
+  }
+
+  trait ListExtension {
+    def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+      def go(ls: List[A], rs: List[A]): Boolean = (ls, rs) match {
+        case (Cons(x, xs), Cons(y, ys)) => if (x == y) go(xs, ys) else false
+        case (_, Nil) => true
+        case _ => false
+      }
+
+      (sup, sub) match {
+        case (Nil, Nil) => true
+        case (Cons(x, xs), _) => if (go(sup, sub)) true else hasSubsequence(xs, sub)
+        case _ => false
+      }
     }
   }
 }
