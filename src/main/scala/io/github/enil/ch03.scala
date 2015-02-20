@@ -39,7 +39,8 @@ with Exercise317.ListExtension
 with Exercise318.ListExtension
 with Exercise319.ListExtension
 with Exercise320.ListExtension
-with Exercise321.ListExtension {
+with Exercise321.ListExtension
+with Exercise322.ListExtension {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
@@ -380,5 +381,26 @@ object Exercise321 {
   trait ListExtension extends Exercise320.ListExtension {
     def filter2[A](as: List[A])(f: A => Boolean): List[A] =
       flatMap(as)(a => if (f(a)) List(a) else Nil)
+  }
+}
+
+/**
+ * Exercise 3.22: implement List.addInts.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise322 {
+  def main(args: Array[String]): Unit = {
+    assert(List.addInts(List(1, 2, 3), List(4, 5, 6)) == List(5, 7, 9))
+    assert(List.addInts(List(1, 2, 3), List(4, 5)) == List(5, 7))
+    assert(List.addInts(List(1, 2, 3), Nil) == Nil)
+    assert(List.addInts(Nil, Nil) == Nil)
+  }
+
+  trait ListExtension {
+    def addInts(ls: List[Int], rs: List[Int]): List[Int] = (ls, rs) match {
+      case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addInts(xs, ys))
+      case _ => Nil
+    }
   }
 }
