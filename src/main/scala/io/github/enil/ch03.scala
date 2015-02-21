@@ -555,3 +555,23 @@ object Exercise326 {
     }
   }
 }
+
+/**
+ * Exercise 3.27: implement Tree.depth.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise327 {
+  def main(args: Array[String]): Unit = {
+    assert(Tree.depth(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.depth(Branch(Leaf(1), Leaf(2))) == 2)
+    assert(Tree.depth(Leaf(1)) == 1)
+  }
+
+  object Tree {
+    def depth[A](t: Tree[A]): Int = t match {
+      case Leaf(_) => 1
+      case Branch(l, r) => 1 + (depth(l) max depth(r))
+    }
+  }
+}
