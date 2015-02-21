@@ -502,18 +502,16 @@ object Exercise324 {
   }
 
   trait ListExtension {
-    def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
-      def go(ls: List[A], rs: List[A]): Boolean = (ls, rs) match {
-        case (Cons(x, xs), Cons(y, ys)) => if (x == y) go(xs, ys) else false
-        case (_, Nil) => true
-        case _ => false
-      }
+    def startsWith[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+      case (Cons(x, xs), Cons(y, ys)) => if (x == y) startsWith(xs, ys) else false
+      case (_, Nil) => true
+      case _ => false
+    }
 
-      (sup, sub) match {
-        case (Nil, Nil) => true
-        case (Cons(x, xs), _) => if (go(sup, sub)) true else hasSubsequence(xs, sub)
-        case _ => false
-      }
+    def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+      case (Nil, Nil) => true
+      case (Cons(x, xs), _) => if (startsWith(sup, sub)) true else hasSubsequence(xs, sub)
+      case _ => false
     }
   }
 }
