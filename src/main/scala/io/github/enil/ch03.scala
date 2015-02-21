@@ -594,3 +594,46 @@ object Exercise328 {
     }
   }
 }
+
+/**
+ * Exercise 3.29: implement Tree.fold and size, maximum, depth and map using fold.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise329 {
+  def main(args: Array[String]) {
+    assert(Tree.size(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 5)
+    assert(Tree.size(Branch(Leaf(1), Leaf(2))) == 3)
+    assert(Tree.size(Leaf(1)) == 1)
+
+    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(3), Leaf(2)))) == 3)
+    assert(Tree.maximum(Leaf(1)) == 1)
+
+    assert(Tree.depth(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.depth(Branch(Leaf(1), Leaf(2))) == 2)
+    assert(Tree.depth(Leaf(1)) == 1)
+
+    assert(Tree.map(Branch(Leaf(1), Leaf(2)))(_.toString) == Branch(Leaf("1"), Leaf("2")))
+    assert(Tree.map(Leaf(2))(x => x * x) == Leaf(4))
+  }
+
+  object Tree {
+    def fold[A, B](t: Tree[A])(f: A => B)(g: (B, B) => B): B = t match {
+      case Leaf(a) => f(a)
+      case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
+    }
+
+    def size[A](t: Tree[A]): Int =
+      fold(t)(_ => 1)(1 + _ + _)
+
+    def maximum(t: Tree[Int]): Int =
+      fold(t)(x => x)(_ max _)
+
+    def depth[A](t: Tree[A]): Int =
+      fold(t)(_ => 1)(_ max _ + 1)
+
+    def map[A, B](t: Tree[A])(f: A => B): Tree[B] =
+      fold[A, Tree[B]](t)(x => Leaf(f(x)))(Branch(_, _))
+  }
+}
