@@ -575,3 +575,22 @@ object Exercise327 {
     }
   }
 }
+
+/**
+ * Exercise 3.28: implement Tree.map.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise328 {
+  def main(args: Array[String]): Unit = {
+    assert(Tree.map(Branch(Leaf(1), Leaf(2)))(_.toString) == Branch(Leaf("1"), Leaf("2")))
+    assert(Tree.map(Leaf(2))(x => x * x) == Leaf(4))
+  }
+
+  object Tree {
+    def map[A, B](t: Tree[A])(f: A => B): Tree[B] = t match {
+      case Leaf(a) => Leaf(f(a))
+      case Branch(l, r) => Branch(map(l)(f), map(r)(f))
+    }
+  }
+}
