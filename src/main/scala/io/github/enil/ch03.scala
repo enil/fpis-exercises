@@ -517,3 +517,23 @@ object Exercise324 {
     }
   }
 }
+
+/**
+ * Exercise 3.25: implement Tree.size.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise325 {
+  def main(args: Array[String]): Unit = {
+    assert(Tree.size(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 5)
+    assert(Tree.size(Branch(Leaf(1), Leaf(2))) == 3)
+    assert(Tree.size(Leaf(1)) == 1)
+  }
+
+  object Tree {
+    def size[A](t: Tree[A]): Int = t match {
+      case Leaf(_) => 1
+      case Branch(l, r) => 1 + size(l) + size(r)
+    }
+  }
+}
