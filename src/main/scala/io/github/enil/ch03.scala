@@ -537,3 +537,23 @@ object Exercise325 {
     }
   }
 }
+
+/**
+ * Exercise 3.26: implement Tree.maximum.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise326 {
+  def main(args: Array[String]): Unit = {
+    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(3), Leaf(2)))) == 3)
+    assert(Tree.maximum(Leaf(1)) == 1)
+  }
+
+  object Tree {
+    def maximum(t: Tree[Int]): Int = t match {
+      case Leaf(x) => x
+      case Branch(l, r) => maximum(l) max maximum(r)
+    }
+  }
+}
