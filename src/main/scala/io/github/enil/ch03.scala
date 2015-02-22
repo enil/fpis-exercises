@@ -1,4 +1,4 @@
-/**
+/*
  * Some of the traits, objects and classes are based on the source code from Functional Programming in Scala.
  * The original source code from Functional Programming in Scala can be found at https://github.com/fpinscala/fpinscala.
  * These code sections are copyrighted by Manning Publications, Co:
