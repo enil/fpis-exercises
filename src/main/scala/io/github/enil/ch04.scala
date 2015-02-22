@@ -135,3 +135,23 @@ object Exercise41 {
     assert((None:Option[String]).filter(g) == None)
   }
 }
+
+/**
+ * Exercise 4.2: implement variance using Option.flatMap.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise42 {
+  def main(args: Array[String]): Unit = {
+    assert(variance(Seq(1.0, 3.0)) == Some(2.0))
+    assert(variance(Seq(1.0)) == Some(0.0))
+    assert(variance(Seq()) == None)
+  }
+
+  def variance(xs: Seq[Double]): Option[Double] =
+    mean(xs).flatMap(m => Some(xs.map(x => Math.pow(x - m, 2)).sum))
+
+  def mean(xs: Seq[Double]): Option[Double] =
+    if (xs.isEmpty) None
+    else Some(xs.sum / xs.length)
+}
