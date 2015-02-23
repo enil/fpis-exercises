@@ -47,7 +47,7 @@
  */
 package io.github.enil
 
-import scala.{Option => _, List => _}
+import scala.{Option => _, Either => _, List => _}
 
 /**
  * From Functional Programming in Scala.
@@ -103,6 +103,21 @@ case class Some[+A](get: A) extends Option[A]
  * From Functional Programming in Scala.
  */
 case object None extends Option[Nothing]
+
+/**
+ * From Functional Programming in Scala.
+ */
+sealed trait Either[+E, +A]
+
+/**
+ * From Functional Programming in Scala.
+ */
+case class Left[+E](value: E) extends Either[E, Nothing]
+
+/**
+ * From Functional Programming in Scala.
+ */
+case class Right[+A](value: A) extends Either[Nothing, A]
 
 /**
  * Exercise 4.1: implement Option.map, Option.flatMap, Option.getOrElse, Option.orElse and Option.filter.
