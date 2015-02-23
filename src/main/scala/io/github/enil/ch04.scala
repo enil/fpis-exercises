@@ -215,6 +215,12 @@ object Exercise45 {
     assert(Option.traverse(List(1, 2, -1))(f) == None)
     assert(Option.traverse(List())(f) == Some(List()))
     assert(Option.traverse(List(-1))(f) == None)
+
+    assert(Option.sequence(List(Some(1), Some(2), Some(3))) == Some(List(1, 2, 3)))
+    assert(Option.sequence(List(Some(1), None, Some(3))) == None)
+    assert(Option.sequence(List(Some(1), Some(2), None)) == None)
+    assert(Option.sequence(List()) == Some(List()))
+    assert(Option.sequence(List(None)) == None)
   }
 
   object Option {
@@ -222,6 +228,9 @@ object Exercise45 {
       case Nil => Some(Nil)
       case Cons(x, xx) => map2(f(x), traverse(xx)(f))((l, r) => Cons(l, r))
     }
+
+    def sequence[A](a: List[Option[A]]): Option[List[A]] =
+      traverse(a)(x => x)
 
     /**
      * Copied from exercise43.Option.
