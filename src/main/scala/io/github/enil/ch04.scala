@@ -200,3 +200,35 @@ object Exercise44 {
     }
   }
 }
+
+/**
+ * Exercise 4.5: implement Option.traverse.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise45 {
+  def main(args: Array[String]): Unit = {
+    def f = (x: Int) => if (x >= 0) Some(x.toString) else None
+
+    assert(Option.traverse(List(1, 2, 3))(f) == Some(List("1", "2", "3")))
+    assert(Option.traverse(List(1, -1, 3))(f) == None)
+    assert(Option.traverse(List(1, 2, -1))(f) == None)
+    assert(Option.traverse(List())(f) == Some(List()))
+    assert(Option.traverse(List(-1))(f) == None)
+  }
+
+  object Option {
+    def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+      case Nil => Some(Nil)
+      case Cons(x, xx) => map2(f(x), traverse(xx)(f))((l, r) => Cons(l, r))
+    }
+
+    /**
+     * Copied from exercise43.Option.
+     */
+    def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = (a, b) match {
+      case (Some(x), Some(y)) => Some(f(x, y))
+      case _ => None
+    }
+  }
+}
