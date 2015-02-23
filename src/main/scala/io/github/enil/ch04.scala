@@ -107,7 +107,41 @@ case object None extends Option[Nothing]
 /**
  * From Functional Programming in Scala.
  */
-sealed trait Either[+E, +A]
+sealed trait Either[+E, +A] {
+  /**
+   * @author Emil Nilsson
+   */
+  def map[B](f: A => B): Either[E, B] = this match {
+    case Left(e) => Left(e)
+    case Right(a) => Right(f(a))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+    case Left(e) => Left(e)
+    case Right(a) => f(a)
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
+    case Left(_) => b
+    case Right(a) => this
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] = (this, b) match {
+    // TODO: not sure whether it should be short-circuiting
+    case (Left(x), _) => Left(x)
+    case (_, Left(y)) => Left(y)
+    case (Right(x), Right(y)) => Right(f(x, y))
+  }
+}
 
 /**
  * From Functional Programming in Scala.
@@ -254,5 +288,33 @@ object Exercise45 {
       case (Some(x), Some(y)) => Some(f(x, y))
       case _ => None
     }
+  }
+}
+
+/**
+ * @author Emil Nilsson
+ */
+object Exercise46 {
+  def main(args: Array[String]) {
+    val f = (x: Int) => x * x
+
+    assert(Left("error").map(f) == Left("error"))
+    assert(Right(2).map(f) == Right(4))
+
+    val g = (x: Int) => if (x != 0) Right(x * x) else Left("x is 0")
+
+    assert(Left("error").flatMap(g) == Left("error"))
+    assert(Right(2).flatMap(g) == Right(4))
+    assert(Right(0).flatMap(g) == Left("x is 0"))
+
+    assert(Left("error").orElse(Right(-1)) == Right(-1))
+    assert(Left("error").orElse(Left("unknown error")) == Left("unknown error"))
+    assert(Right(2).orElse(Right(-1)) == Right(2))
+
+    val h = (x: Int, y: Int) => x + y
+
+    assert(Left("error1").map2(Left("error2"))(h) == Left("error1"))
+    assert(Right(1).map2(Left("error2"))(h) == Left("error2"))
+    assert(Right(1).map2(Right(2))(h) == Right(3))
   }
 }
