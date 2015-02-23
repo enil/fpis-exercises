@@ -47,7 +47,7 @@
  */
 package io.github.enil
 
-import scala.{Option => _}
+import scala.{Option => _, List => _}
 
 /**
  * From Functional Programming in Scala.
@@ -174,6 +174,29 @@ object Exercise43 {
     def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = (a, b) match {
       case (Some(x), Some(y)) => Some(f(x, y))
       case _ => None
+    }
+  }
+}
+
+/**
+ * Exercise 4.4: implement Option.sequence.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise44 {
+  def main(args: Array[String]): Unit = {
+    assert(Option.sequence(List(Some(1), Some(2), Some(3))) == Some(List(1, 2, 3)))
+    assert(Option.sequence(List(Some(1), None, Some(3))) == None)
+    assert(Option.sequence(List(Some(1), Some(2), None)) == None)
+    assert(Option.sequence(List()) == Some(List()))
+    assert(Option.sequence(List(None)) == None)
+  }
+
+  object Option {
+    def sequence[A](a: List[Option[A]]): Option[List[A]] = a match {
+      case Nil => Some(Nil)
+      case Cons(None, _) => None
+      case Cons(Some(x), xx) => sequence(xx).flatMap(y => Some(Cons(x, y)))
     }
   }
 }
