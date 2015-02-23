@@ -155,3 +155,25 @@ object Exercise42 {
     if (xs.isEmpty) None
     else Some(xs.sum / xs.length)
 }
+
+/**
+ * Exercise 4.3: implement Option.map2.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise43 {
+  def main(args: Array[String]): Unit = {
+    val f = (s: String, n: Int) => s + n.toString
+
+    assert(Option.map2(Some("foo"), Some(1))(f) == Some("foo1"))
+    assert(Option.map2(Some("foo"), None)(f) == None)
+    assert(Option.map2(None, Some(1))(f) == None)
+  }
+
+  object Option {
+    def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = (a, b) match {
+      case (Some(x), Some(y)) => Some(f(x, y))
+      case _ => None
+    }
+  }
+}
