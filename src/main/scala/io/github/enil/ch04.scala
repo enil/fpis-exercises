@@ -292,6 +292,8 @@ object Exercise45 {
 }
 
 /**
+ * Exercise 4.6: implement Either.map, Either.flatMap, Either.orElse and Either.map2.
+ *
  * @author Emil Nilsson
  */
 object Exercise46 {
@@ -316,5 +318,40 @@ object Exercise46 {
     assert(Left("error1").map2(Left("error2"))(h) == Left("error1"))
     assert(Right(1).map2(Left("error2"))(h) == Left("error2"))
     assert(Right(1).map2(Right(2))(h) == Right(3))
+  }
+}
+
+/**
+ * Exercise 4.7: implement Either.sequence and Either.traverse.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise47 {
+  def main(args: Array[String]) {
+    def f = (x: Int) => if (x >= 0) Right(x.toString) else Left(s"x is $x")
+
+    assert(Either.traverse(List(1, 2, 3))(f) == Right(List("1", "2", "3")))
+    assert(Either.traverse(List(1, -2, 3))(f) == Left("x is -2"))
+    assert(Either.traverse(List(1, 2, -3))(f) == Left("x is -3"))
+    assert(Either.traverse(List(1, -2, -3))(f) == Left("x is -2"))
+    assert(Either.traverse(List())(f) == Right(List()))
+    assert(Either.traverse(List(-1))(f) == Left("x is -1"))
+
+    assert(Either.sequence(List(Right(1), Right(2), Right(3))) == Right(List(1, 2, 3)))
+    assert(Either.sequence(List(Right(1), Left("no value"), Right(3))) == Left("no value"))
+    assert(Either.sequence(List(Right(1), Right(2), Left("no value"))) == Left("no value"))
+    assert(Either.sequence(List(Right(1), Left("invalid"), Left("no value"))) == Left("invalid"))
+    assert(Either.sequence(List()) == Right(List()))
+    assert(Either.sequence(List(Left("no value"))) == Left("no value"))
+  }
+
+  object Either {
+    def sequence[E, A](es: List[Either[E, A]]): Either[E, List[A]] =
+      traverse(es)(x => x)
+
+    def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]] = as match {
+      case Nil => Right(Nil)
+      case Cons(a, aa) => f(a).map2(traverse(aa)(f))((x, y) => Cons(x, y))
+    }
   }
 }
