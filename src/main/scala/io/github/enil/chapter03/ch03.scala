@@ -46,7 +46,9 @@
  * THE SOFTWARE.
  */
 
-package io.github.enil
+package io.github.enil.chapter03
+
+import scala.{List => _, Nil => _}
 
 /**
  * From Functional Programming in Scala.

@@ -45,9 +45,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package io.github.enil
 
-import scala.{Option => _, Either => _, List => _}
+package io.github.enil.chapter04
+
+import scala.{Either => _, List => _, Nil => _, Option => _}
 
 /**
  * From Functional Programming in Scala.
@@ -140,6 +141,46 @@ sealed trait Either[+E, +A] {
     case (Left(x), _) => Left(x)
     case (_, Left(y)) => Left(y)
     case (Right(x), Right(y)) => Right(f(x, y))
+  }
+}
+
+/**
+ * From Functional Programming in Scala.
+ */
+sealed trait List[+A]
+
+/**
+ * From Functional Programming in Scala.
+ */
+case object Nil extends List[Nothing]
+
+/**
+ * From Functional Programming in Scala.
+ */
+case class Cons[+A](head: A, tail: List[A]) extends List[A]
+
+/**
+ * From Functional Programming in Scala.
+ */
+object List {
+  def sum(ints: List[Int]): Int = ints match {
+    case Nil => 0
+    case Cons(x, xs) => x + sum(xs)
+  }
+
+  def product(ds: List[Double]): Double = ds match {
+    case Nil => 1.0
+    case Cons(0.0, _) => 0
+    case Cons(x, xs) => x * product(xs)
+  }
+
+  def apply[A](as: A*): List[A] =
+    if (as.isEmpty) Nil
+    else Cons(as.head, apply(as.tail: _*))
+
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
+    case Nil => z
+    case Cons(x, xs) => f(x, foldRight(xs, z)(f))
   }
 }
 

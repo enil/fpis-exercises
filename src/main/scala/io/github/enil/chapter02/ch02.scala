@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package io.github.enil
+package io.github.enil.chapter02
 
 /**
  * Exercise 2.1: calculate fibonacci numbers using tail-recursion.
