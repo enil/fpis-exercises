@@ -51,7 +51,15 @@ package io.github.enil.chapter05
 /**
  * From Functional Programming in Scala.
  */
-sealed trait Stream[+A]
+sealed trait Stream[+A] {
+  /**
+   * @author Emil Nilsson
+   */
+  def toList: List[A] = this match {
+    case Empty => Nil
+    case Cons(x, xx) => x() :: xx().toList
+  }
+}
 
 /**
  * From Functional Programming in Scala.
@@ -77,4 +85,16 @@ object Stream {
 
   def apply[A](as: A*): Stream[A] =
     if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+}
+
+/**
+ * Exercise 5.1: implement Stream.toList.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise51 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).toList == List(1, 2, 3))
+    assert(Stream().toList == List())
+  }
 }
