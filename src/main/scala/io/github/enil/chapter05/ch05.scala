@@ -75,6 +75,14 @@ sealed trait Stream[+A] {
     case Empty => Empty
     case Cons(x, xx) => if (n > 0) xx().drop(n - 1) else this
   }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def dropWhile(f: A => Boolean): Stream[A] = this match {
+    case Empty => Empty
+    case Cons(x, xx) => if (f(x())) xx().dropWhile(f) else this
+  }
 }
 
 /**
@@ -139,5 +147,18 @@ object Exercise52 {
     assert(Stream(1, 2, 3).drop(2) == Stream(3))
     assert(Stream(1, 2, 3).drop(4) == Empty)
     assert(Stream(1).drop(0) == Stream(1))
+  }
+}
+
+/**
+ * Exercise 5.3: implement Stream.dropWhile.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise53 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).dropWhile((x: Int) => x < 3) == Stream(3))
+    assert(Stream(1, 2, 3).dropWhile((x: Int) => x > 3) == Stream(1, 2, 3))
+    assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
   }
 }
