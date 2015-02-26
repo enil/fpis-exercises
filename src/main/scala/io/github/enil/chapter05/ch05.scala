@@ -83,6 +83,14 @@ sealed trait Stream[+A] {
     case Empty => Empty
     case Cons(x, xx) => if (f(x())) xx().dropWhile(f) else this
   }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def forAll(p: A => Boolean): Boolean = this match {
+    case Empty => true
+    case Cons(x, xx) => if (p(x())) xx().forAll(p) else false
+  }
 }
 
 /**
@@ -160,5 +168,19 @@ object Exercise53 {
     assert(Stream(1, 2, 3).dropWhile((x: Int) => x < 3) == Stream(3))
     assert(Stream(1, 2, 3).dropWhile((x: Int) => x > 3) == Stream(1, 2, 3))
     assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
+  }
+}
+
+/**
+ * Exercise 5.4: implement Stream.forAll.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise54 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 3, 5).forAll(_ % 2 == 1) == true)
+    assert(Stream(1, 2, 3, 5).forAll(_ % 2 == 1) == false)
+    assert(Stream(1, 3, 5, 6).forAll(_ % 2 == 1) == false)
+    assert(Empty.forAll((x: Int) => x % 2 == 1) == true)
   }
 }
