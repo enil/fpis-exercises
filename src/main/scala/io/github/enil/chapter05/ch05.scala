@@ -59,6 +59,22 @@ sealed trait Stream[+A] {
     case Empty => Nil
     case Cons(x, xx) => x() :: xx().toList
   }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def take(n: Int): Stream[A] = this match {
+    case Empty => Empty
+    case Cons(x, xx) => if (n > 0) Cons(x, () => xx().take(n - 1)) else Empty
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def drop(n: Int): Stream[A] = this match {
+    case Empty => Empty
+    case Cons(x, xx) => if (n > 0) xx().drop(n - 1) else this
+  }
 }
 
 /**
@@ -69,7 +85,17 @@ case object Empty extends Stream[Nothing]
 /**
  * From Functional Programming in Scala.
  */
-case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
+case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A] {
+  /**
+   * A comparison method is needed to work in assert without having to convert to lists.
+   *
+   * @author Emil Nilsson
+   */
+  override def equals(obj: Any): Boolean = obj match  {
+    case that: Cons[A] => that.h() == h() && that.t() == t()
+    case _ => false
+  }
+}
 
 /**
  * From Functional Programming in Scala.
@@ -96,5 +122,22 @@ object Exercise51 {
   def main(args: Array[String]): Unit = {
     assert(Stream(1, 2, 3).toList == List(1, 2, 3))
     assert(Stream().toList == List())
+  }
+}
+
+/**
+ * Exercise 5.2: implement Stream.take and Stream.drop.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise52 {
+  def main (args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).take(2) == Stream(1, 2))
+    assert(Stream(1, 2, 3).take(4) == Stream(1, 2, 3))
+    assert(Stream(1, 2, 3).take(0) == Empty)
+
+    assert(Stream(1, 2, 3).drop(2) == Stream(3))
+    assert(Stream(1, 2, 3).drop(4) == Empty)
+    assert(Stream(1).drop(0) == Stream(1))
   }
 }
