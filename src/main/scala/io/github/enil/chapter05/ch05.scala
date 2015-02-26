@@ -53,6 +53,14 @@ package io.github.enil.chapter05
  */
 sealed trait Stream[+A] {
   /**
+   * From Functional Programming in Scala.
+   */
+  def foldRight[B](z: => B)(f: (A, => B) => B): B = this match {
+    case Cons(h, t) => f(h(), t().foldRight(z)(f))
+    case _ => z
+  }
+
+  /**
    * @author Emil Nilsson
    */
   def toList: List[A] = this match {
@@ -91,6 +99,12 @@ sealed trait Stream[+A] {
     case Empty => true
     case Cons(x, xx) => if (p(x())) xx().forAll(p) else false
   }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def takeWhile(p: A => Boolean): Stream[A] =
+    this.foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else Stream.empty[A])
 }
 
 /**
@@ -182,5 +196,18 @@ object Exercise54 {
     assert(Stream(1, 2, 3, 5).forAll(_ % 2 == 1) == false)
     assert(Stream(1, 3, 5, 6).forAll(_ % 2 == 1) == false)
     assert(Empty.forAll((x: Int) => x % 2 == 1) == true)
+  }
+}
+
+/**
+ * Exercise 5.5: implement Stream.takeWhile using Stream.foldRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise55 {
+  def main(args: Array[String]) {
+    assert(Stream(1, 2, 3).takeWhile((x: Int) => x < 3) == Stream(1, 2))
+    assert(Stream(1, 2, 3).takeWhile((x: Int) => x > 3) == Empty)
+    assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
   }
 }
