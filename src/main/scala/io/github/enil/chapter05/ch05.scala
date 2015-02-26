@@ -105,6 +105,12 @@ sealed trait Stream[+A] {
    */
   def takeWhile(p: A => Boolean): Stream[A] =
     this.foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else Stream.empty[A])
+
+  /**
+   * @author Emil Nilsson
+   */
+  def headOption: Option[A] =
+    this.foldRight[Option[A]](None)((h, _) => Some(h))
 }
 
 /**
@@ -209,5 +215,17 @@ object Exercise55 {
     assert(Stream(1, 2, 3).takeWhile((x: Int) => x < 3) == Stream(1, 2))
     assert(Stream(1, 2, 3).takeWhile((x: Int) => x > 3) == Empty)
     assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
+  }
+}
+
+/**
+ * Exercise 5.6: implement Stream.headOption using Stream.foldRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise56 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).headOption == Some(1))
+    assert(Empty.headOption == None)
   }
 }
