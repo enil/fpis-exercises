@@ -104,13 +104,37 @@ sealed trait Stream[+A] {
    * @author Emil Nilsson
    */
   def takeWhile(p: A => Boolean): Stream[A] =
-    this.foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else Stream.empty[A])
+    foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else Stream.empty[A])
 
   /**
    * @author Emil Nilsson
    */
   def headOption: Option[A] =
     this.foldRight[Option[A]](None)((h, _) => Some(h))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map[B](f: A => B): Stream[B] =
+    foldRight(Stream.empty[B])((h, t) => Stream.cons(f(h), t))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def filter(p: A => Boolean): Stream[A] =
+    foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else t)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def append[B >: A](bs: => Stream[B]): Stream[B] =
+    foldRight(bs)(Stream.cons(_, _))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight(Stream.empty[B])((h, t) => f(h) append t)
 }
 
 /**
@@ -227,5 +251,30 @@ object Exercise56 {
   def main(args: Array[String]): Unit = {
     assert(Stream(1, 2, 3).headOption == Some(1))
     assert(Empty.headOption == None)
+  }
+}
+
+/**
+ * Exercise 5.7: implement Stream.map, Stream.filter, Stream.append and Stream.flatMap using Stream.foldRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise57 {
+  def main (args: Array[String]) {
+    assert(Stream(1, 2, 3).map(_.toString) == Stream("1", "2", "3"))
+    assert(Stream(1, 2, 3).map(_ + 1) == Stream(2, 3, 4))
+    assert(Empty.map(_.toString) == Empty)
+
+    assert(Stream(1, 2, 3, 4, 5).filter(_ % 2 == 0) == Stream(2, 4))
+    assert(Stream(1, 3, 5, 7).filter(_ % 2 == 0) == Empty)
+    assert(Empty.filter(_ => false) == Empty)
+
+    assert(Stream(1, 2, 3).append(Stream(4, 5, 6)) == Stream(1, 2, 3, 4, 5, 6))
+    assert(Stream(1, 2, 3).append(Empty) == Stream(1, 2, 3))
+    assert(Empty.append(Stream(4, 5, 6)) == Stream(4, 5, 6))
+
+    assert(Stream(1, 2, 3).flatMap(i => Stream(i, i)) == Stream(1, 1, 2, 2, 3, 3))
+    assert(Stream(1, 2, 3).flatMap(_ => Empty) == Empty)
+    assert(Empty.flatMap(_ => Empty) == Empty)
   }
 }
