@@ -68,43 +68,199 @@ case class Cons[+A](head: A, tail: List[A]) extends List[A]
 /**
  * From Functional Programming in Scala.
  */
-object List extends Exercise32.ListExtension
-with Exercise33.ListExtension
-with Exercise34.ListExtension
-with Exercise35.ListExtension
-with Exercise36.ListExtension
-with Exercise39.ListExtension
-with Exercise310.ListExtension
-with Exercise311.ListExtension
-with Exercise312.ListExtension
-with Exercise314.ListExtension
-with Exercise316.ListExtension
-with Exercise317.ListExtension
-with Exercise318.ListExtension
-with Exercise319.ListExtension
-with Exercise320.ListExtension
-with Exercise321.ListExtension
-with Exercise322.ListExtension
-with Exercise323.ListExtension
-with Exercise324.ListExtension {
+object List {
+  /**
+   * From Functional Programming in Scala.
+   */
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
     case Cons(x, xs) => x + sum(xs)
   }
 
+  /**
+   * From Functional Programming in Scala.
+   */
   def product(ds: List[Double]): Double = ds match {
     case Nil => 1.0
     case Cons(0.0, _) => 0
     case Cons(x, xs) => x * product(xs)
   }
 
+  /**
+   * From Functional Programming in Scala.
+   */
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
 
+  /**
+   * From Functional Programming in Scala.
+   */
   def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
     case Nil => z
     case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def tail[A](as: List[A]): List[A] = as match {
+    case Cons(x, xs) => xs
+    case _ => Nil
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def setHead[A](as: List[A], a: A): List[A] = as match {
+    case Cons(x, xs) => Cons(a, xs)
+    case _ => Cons(a, Nil)
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def drop[A](l: List[A], n: Int): List[A] = {
+    if (n == 0) l
+    else l match {
+      case Nil => Nil
+      case Cons(x, xs) => drop(xs, n - 1)
+    }
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil => Nil
+    case Cons(x, xs) => if (f(x)) dropWhile(xs, f) else l
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case Cons(x, Nil) => Nil
+    case Cons(x, xs) => Cons(x, init(xs))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def length[A](as: List[A]): Int =
+    foldRight(as, 0)((_, x) => x + 1)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
+    case Nil => z
+    case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def sum2(ns: List[Int]): Int =
+    foldLeft(ns, 0)(_ + _)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def product2(ns: List[Double]): Double =
+    foldLeft(ns, 1.0)(_ * _)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def reverse[A](as: List[A]): List[A] =
+    foldLeft(as, Nil:List[A])((xs, x) => Cons(x, xs))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def append[A](left: List[A], right: List[A]): List[A] =
+    foldRight(left, right)(Cons(_, _))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def increase(ns: List[Int]): List[Int] = ns match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(x + 1, increase(xs))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def doublesToStrings(ns: List[Double]): List[String] = ns match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(x.toString, doublesToStrings(xs))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map[A, B](as: List[A])(f: A => B): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(f(x), map(xs)(f))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => if (f(x)) Cons(x, filter(xs)(f)) else filter(xs)(f)
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => append(f(x), flatMap(xs)(f))
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def filter2[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else Nil)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def addInts(ls: List[Int], rs: List[Int]): List[Int] = (ls, rs) match {
+    case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addInts(xs, ys))
+    case _ => Nil
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def zipWith[A, B, C](ls: List[A], rs: List[B])(f: (A, B) => C): List[C] = (ls, rs) match {
+    case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
+    case _ => Nil
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def startsWith[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (Cons(x, xs), Cons(y, ys)) => if (x == y) startsWith(xs, ys) else false
+    case (_, Nil) => true
+    case _ => false
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (Nil, Nil) => true
+    case (Cons(x, xs), _) => if (startsWith(sup, sub)) true else hasSubsequence(xs, sub)
+    case _ => false
   }
 }
 
@@ -124,6 +280,50 @@ case class Leaf[A](value: A) extends Tree[A]
 case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 /**
+ * Companion object for the Tree trait.
+ *
+ * @author Emil Nilsson
+ */
+object Tree {
+  def size[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 1
+    case Branch(l, r) => 1 + size(l) + size(r)
+  }
+
+  def maximum(t: Tree[Int]): Int = t match {
+    case Leaf(x) => x
+    case Branch(l, r) => maximum(l) max maximum(r)
+  }
+
+  def depth[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 1
+    case Branch(l, r) => 1 + (depth(l) max depth(r))
+  }
+
+  def map[A, B](t: Tree[A])(f: A => B): Tree[B] = t match {
+    case Leaf(a) => Leaf(f(a))
+    case Branch(l, r) => Branch(map(l)(f), map(r)(f))
+  }
+
+  def fold[A, B](t: Tree[A])(f: A => B)(g: (B, B) => B): B = t match {
+    case Leaf(a) => f(a)
+    case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
+  }
+
+  def size2[A](t: Tree[A]): Int =
+    fold(t)(_ => 1)(1 + _ + _)
+
+  def maximum2(t: Tree[Int]): Int =
+    fold(t)(x => x)(_ max _)
+
+  def depth2[A](t: Tree[A]): Int =
+    fold(t)(_ => 1)(_ max _ + 1)
+
+  def map2[A, B](t: Tree[A])(f: A => B): Tree[B] =
+    fold[A, Tree[B]](t)(x => Leaf(f(x)))(Branch(_, _))
+}
+
+/**
  * Exercise 3.2: implement List.tail.
  *
  * @author Emil Nilsson
@@ -133,13 +333,6 @@ object Exercise32 {
     assert(List.tail(List(1, 2, 3)) == List(2, 3))
     assert(List.tail(List(1)) == Nil)
     assert(List.tail(Nil) == Nil)
-  }
-
-  trait ListExtension {
-    def tail[A](as: List[A]): List[A] = as match {
-      case Cons(x, xs) => xs
-      case _ => Nil
-    }
   }
 }
 
@@ -154,13 +347,6 @@ object Exercise33 {
     assert(List.setHead(List(1), 2) == List(2))
     assert(List.setHead(Nil, 1) == List(1))
   }
-
-  trait ListExtension {
-    def setHead[A](as: List[A], a: A): List[A] = as match {
-      case Cons(x, xs) => Cons(a, xs)
-      case _ => Cons(a, Nil)
-    }
-  }
 }
 
 /**
@@ -173,16 +359,6 @@ object Exercise34 {
     assert(List.drop(List(1, 2, 3), 2) == List(3))
     assert(List.drop(List(1, 2, 3), 4) == Nil)
     assert(List.drop(List(1), 0) == List(1))
-  }
-
-  trait ListExtension {
-    def drop[A](l: List[A], n: Int): List[A] = {
-      if (n == 0) l
-      else l match {
-        case Nil => Nil
-        case Cons(x, xs) => drop(xs, n - 1)
-      }
-    }
   }
 }
 
@@ -197,13 +373,6 @@ object Exercise35 {
     assert(List.dropWhile(List(1, 2, 3), (x: Int) => x > 3) == List(1, 2, 3))
     assert(List.dropWhile(Nil, (x: Int) => x < 3) == Nil)
   }
-
-  trait ListExtension {
-    def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
-      case Nil => Nil
-      case Cons(x, xs) => if (f(x)) dropWhile(xs, f) else l
-    }
-  }
 }
 
 /**
@@ -216,14 +385,6 @@ object Exercise36 {
     assert(List.init(List(1, 2, 3)) == List(1, 2))
     assert(List.init(List(1)) == Nil)
     assert(List.init(Nil) == Nil)
-  }
-
-  trait ListExtension {
-    def init[A](l: List[A]): List[A] = l match {
-      case Nil => Nil
-      case Cons(x, Nil) => Nil
-      case Cons(x, xs) => Cons(x, init(xs))
-    }
   }
 }
 
@@ -238,11 +399,6 @@ object Exercise39 {
     assert(List.length(List(1)) == 1)
     assert(List.length(Nil) == 0)
   }
-
-  trait ListExtension {
-    def length[A](as: List[A]): Int =
-      List.foldRight(as, 0)((_, x) => x + 1)
-  }
 }
 
 /**
@@ -255,13 +411,6 @@ object Exercise310 {
     assert(List.foldLeft(List(1, 2, 3), 0.0)(_ + _) == 6)
     assert(List.foldLeft(List(6, 7), 1.0)(_ * _) == 42)
     assert(List.foldLeft(Nil:List[Double], 0.0)(_ + _) == 0.0)
-  }
-
-  trait ListExtension {
-    def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
-      case Nil => z
-      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
-    }
   }
 }
 
@@ -278,14 +427,6 @@ object Exercise311 {
     assert(List.product2(List(6.0, 7.0)) == 42.0)
     assert(List.sum2(Nil) == 0)
   }
-
-  trait ListExtension extends Exercise310.ListExtension {
-    def sum2(ns: List[Int]): Int =
-      foldLeft(ns, 0)(_ + _)
-
-    def product2(ns: List[Double]): Double =
-      foldLeft(ns, 1.0)(_ * _)
-  }
 }
 
 /**
@@ -297,11 +438,6 @@ object Exercise312 {
   def main(args: Array[String]): Unit = {
     assert(List.reverse(List(1, 2, 3)) == List(3, 2, 1))
     assert(List.reverse(Nil) == Nil)
-  }
-
-  trait ListExtension extends Exercise310.ListExtension {
-    def reverse[A](as: List[A]): List[A] =
-      List.foldLeft(as, Nil:List[A])((xs, x) => Cons(x, xs))
   }
 }
 
@@ -316,11 +452,6 @@ object Exercise314 {
     assert(List.append(List(1, 2, 3), Nil) == List(1, 2, 3))
     assert(List.append(Nil, List(4, 5, 6)) == List(4, 5, 6))
   }
-
-  trait ListExtension extends Exercise310.ListExtension {
-    def append[A](left: List[A], right: List[A]): List[A] =
-      List.foldRight(left, right)(Cons(_, _))
-  }
 }
 
 /**
@@ -333,13 +464,6 @@ object Exercise316 {
     assert(List.increase(List(1, 2, 3)) == List(2, 3, 4))
     assert(List.increase(Nil) == Nil)
   }
-
-  trait ListExtension {
-    def increase(ns: List[Int]): List[Int] = ns match {
-      case Nil => Nil
-      case Cons(x, xs) => Cons(x + 1, increase(xs))
-    }
-  }
 }
 
 /**
@@ -351,13 +475,6 @@ object Exercise317 {
   def main(args: Array[String]): Unit = {
     assert(List.doublesToStrings(List(1.0, 2.0, 3.0)) == List("1.0", "2.0", "3.0"))
     assert(List.doublesToStrings(Nil) == Nil)
-  }
-
-  trait ListExtension {
-    def doublesToStrings(ns: List[Double]): List[String] = ns match {
-      case Nil => Nil
-      case Cons(x, xs) => Cons(x.toString, doublesToStrings(xs))
-    }
   }
 }
 
@@ -372,13 +489,6 @@ object Exercise318 {
     assert(List.map(List(1, 2, 3))(_ + 1) == List(2, 3, 4))
     assert(List.map(Nil)(_.toString) == Nil)
   }
-
-  trait ListExtension {
-    def map[A, B](as: List[A])(f: A => B): List[B] = as match {
-      case Nil => Nil
-      case Cons(x, xs) => Cons(f(x), map(xs)(f))
-    }
-  }
 }
 
 /**
@@ -391,13 +501,6 @@ object Exercise319 {
     assert(List.filter(List(1, 2, 3, 4, 5))(_ % 2 == 0) == List(2, 4))
     assert(List.filter(List(1, 3, 5, 7))(_ % 2 == 0) == Nil)
     assert(List.filter(Nil)(_ => false) == Nil)
-  }
-
-  trait ListExtension {
-    def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
-      case Nil => Nil
-      case Cons(x, xs) => if (f(x)) Cons(x, filter(xs)(f)) else filter(xs)(f)
-    }
   }
 }
 
@@ -412,13 +515,6 @@ object Exercise320 {
     assert(List.flatMap(List(1, 2, 3))(_ => Nil) == Nil)
     assert(List.flatMap(Nil)(_ => Nil) == Nil)
   }
-
-  trait ListExtension extends Exercise314.ListExtension {
-    def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = as match {
-      case Nil => Nil
-      case Cons(x, xs) => append(f(x), flatMap(xs)(f))
-    }
-  }
 }
 
 /**
@@ -431,11 +527,6 @@ object Exercise321 {
     assert(List.filter2(List(1, 2, 3, 4, 5))(_ % 2 == 0) == List(2, 4))
     assert(List.filter2(List(1, 3, 5, 7))(_ % 2 == 0) == Nil)
     assert(List.filter2(Nil)(_ => false) == Nil)
-  }
-
-  trait ListExtension extends Exercise320.ListExtension {
-    def filter2[A](as: List[A])(f: A => Boolean): List[A] =
-      flatMap(as)(a => if (f(a)) List(a) else Nil)
   }
 }
 
@@ -451,13 +542,6 @@ object Exercise322 {
     assert(List.addInts(List(1, 2, 3), Nil) == Nil)
     assert(List.addInts(Nil, Nil) == Nil)
   }
-
-  trait ListExtension {
-    def addInts(ls: List[Int], rs: List[Int]): List[Int] = (ls, rs) match {
-      case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addInts(xs, ys))
-      case _ => Nil
-    }
-  }
 }
 
 /**
@@ -471,13 +555,6 @@ object Exercise323 {
     assert(List.zipWith(List("foo", "bar"), List(1, 2, 3))(_ + _.toString) == List("foo1", "bar2"))
     assert(List.zipWith(List("foo", "bar"), Nil)(_ + _.toString) == Nil)
     assert(List.zipWith(Nil:List[String], Nil:List[Any])(_ + _.toString) == Nil)
-  }
-
-  trait ListExtension {
-    def zipWith[A, B, C](ls: List[A], rs: List[B])(f: (A, B) => C): List[C] = (ls, rs) match {
-      case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
-      case _ => Nil
-    }
   }
 }
 
@@ -496,20 +573,6 @@ object Exercise324 {
     assert(List.hasSubsequence(List(1, 2, 3, 4), Nil) == true)
     assert(List.hasSubsequence(Nil, Nil) == true)
   }
-
-  trait ListExtension {
-    def startsWith[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
-      case (Cons(x, xs), Cons(y, ys)) => if (x == y) startsWith(xs, ys) else false
-      case (_, Nil) => true
-      case _ => false
-    }
-
-    def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
-      case (Nil, Nil) => true
-      case (Cons(x, xs), _) => if (startsWith(sup, sub)) true else hasSubsequence(xs, sub)
-      case _ => false
-    }
-  }
 }
 
 /**
@@ -522,13 +585,6 @@ object Exercise325 {
     assert(Tree.size(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 5)
     assert(Tree.size(Branch(Leaf(1), Leaf(2))) == 3)
     assert(Tree.size(Leaf(1)) == 1)
-  }
-
-  object Tree {
-    def size[A](t: Tree[A]): Int = t match {
-      case Leaf(_) => 1
-      case Branch(l, r) => 1 + size(l) + size(r)
-    }
   }
 }
 
@@ -543,13 +599,6 @@ object Exercise326 {
     assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(3), Leaf(2)))) == 3)
     assert(Tree.maximum(Leaf(1)) == 1)
   }
-
-  object Tree {
-    def maximum(t: Tree[Int]): Int = t match {
-      case Leaf(x) => x
-      case Branch(l, r) => maximum(l) max maximum(r)
-    }
-  }
 }
 
 /**
@@ -563,13 +612,6 @@ object Exercise327 {
     assert(Tree.depth(Branch(Leaf(1), Leaf(2))) == 2)
     assert(Tree.depth(Leaf(1)) == 1)
   }
-
-  object Tree {
-    def depth[A](t: Tree[A]): Int = t match {
-      case Leaf(_) => 1
-      case Branch(l, r) => 1 + (depth(l) max depth(r))
-    }
-  }
 }
 
 /**
@@ -582,13 +624,6 @@ object Exercise328 {
     assert(Tree.map(Branch(Leaf(1), Leaf(2)))(_.toString) == Branch(Leaf("1"), Leaf("2")))
     assert(Tree.map(Leaf(2))(x => x * x) == Leaf(4))
   }
-
-  object Tree {
-    def map[A, B](t: Tree[A])(f: A => B): Tree[B] = t match {
-      case Leaf(a) => Leaf(f(a))
-      case Branch(l, r) => Branch(map(l)(f), map(r)(f))
-    }
-  }
 }
 
 /**
@@ -598,38 +633,19 @@ object Exercise328 {
  */
 object Exercise329 {
   def main(args: Array[String]) {
-    assert(Tree.size(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 5)
-    assert(Tree.size(Branch(Leaf(1), Leaf(2))) == 3)
-    assert(Tree.size(Leaf(1)) == 1)
+    assert(Tree.size2(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 5)
+    assert(Tree.size2(Branch(Leaf(1), Leaf(2))) == 3)
+    assert(Tree.size2(Leaf(1)) == 1)
 
-    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
-    assert(Tree.maximum(Branch(Leaf(1), Branch(Leaf(3), Leaf(2)))) == 3)
-    assert(Tree.maximum(Leaf(1)) == 1)
+    assert(Tree.maximum2(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.maximum2(Branch(Leaf(1), Branch(Leaf(3), Leaf(2)))) == 3)
+    assert(Tree.maximum2(Leaf(1)) == 1)
 
-    assert(Tree.depth(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
-    assert(Tree.depth(Branch(Leaf(1), Leaf(2))) == 2)
-    assert(Tree.depth(Leaf(1)) == 1)
+    assert(Tree.depth2(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))) == 3)
+    assert(Tree.depth2(Branch(Leaf(1), Leaf(2))) == 2)
+    assert(Tree.depth2(Leaf(1)) == 1)
 
-    assert(Tree.map(Branch(Leaf(1), Leaf(2)))(_.toString) == Branch(Leaf("1"), Leaf("2")))
-    assert(Tree.map(Leaf(2))(x => x * x) == Leaf(4))
-  }
-
-  object Tree {
-    def fold[A, B](t: Tree[A])(f: A => B)(g: (B, B) => B): B = t match {
-      case Leaf(a) => f(a)
-      case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
-    }
-
-    def size[A](t: Tree[A]): Int =
-      fold(t)(_ => 1)(1 + _ + _)
-
-    def maximum(t: Tree[Int]): Int =
-      fold(t)(x => x)(_ max _)
-
-    def depth[A](t: Tree[A]): Int =
-      fold(t)(_ => 1)(_ max _ + 1)
-
-    def map[A, B](t: Tree[A])(f: A => B): Tree[B] =
-      fold[A, Tree[B]](t)(x => Leaf(f(x)))(Branch(_, _))
+    assert(Tree.map2(Branch(Leaf(1), Leaf(2)))(_.toString) == Branch(Leaf("1"), Leaf("2")))
+    assert(Tree.map2(Leaf(2))(x => x * x) == Leaf(4))
   }
 }
