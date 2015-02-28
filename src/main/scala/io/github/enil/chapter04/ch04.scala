@@ -323,7 +323,7 @@ object Exercise45 {
       traverse(a)(x => x)
 
     /**
-     * Copied from exercise43.Option.
+     * Copied from Exercise43.Option.
      */
     def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = (a, b) match {
       case (Some(x), Some(y)) => Some(f(x, y))

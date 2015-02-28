@@ -312,13 +312,14 @@ object Exercise312 {
  */
 object Exercise314 {
   def main(args: Array[String]) {
-    assert(List(List(1, 2, 3), 4) == List(1, 2, 3, 4))
-    assert(List(Nil, 1) == List(1))
+    assert(List.append(List(1, 2, 3), List(4, 5, 6)) == List(1, 2, 3, 4, 5, 6))
+    assert(List.append(List(1, 2, 3), Nil) == List(1, 2, 3))
+    assert(List.append(Nil, List(4, 5, 6)) == List(4, 5, 6))
   }
 
   trait ListExtension extends Exercise310.ListExtension {
-    def append[A](as: List[A], a: A): List[A] =
-      List.foldRight(as, Cons(a, Nil))((x, xs) => Cons(x, xs))
+    def append[A](left: List[A], right: List[A]): List[A] =
+      List.foldRight(left, right)(Cons(_, _))
   }
 }
 
@@ -412,17 +413,10 @@ object Exercise320 {
     assert(List.flatMap(Nil)(_ => Nil) == Nil)
   }
 
-  trait ListExtension {
-    def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = {
-      def concat(l: List[B], r: List[B]): List[B] = l match {
-        case Nil => r
-        case Cons(x, xs) => Cons(x, concat(xs, r))
-      }
-
-      as match {
-        case Nil => Nil
-        case Cons(x, xs) => concat(f(x), flatMap(xs)(f))
-      }
+  trait ListExtension extends Exercise314.ListExtension {
+    def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = as match {
+      case Nil => Nil
+      case Cons(x, xs) => append(f(x), flatMap(xs)(f))
     }
   }
 }
