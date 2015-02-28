@@ -186,6 +186,12 @@ object Stream {
    */
   def constant[A](a: A): Stream[A] =
     cons(a, constant(a))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def from(n: Int): Stream[Int] =
+    cons(n, from(n + 1))
 }
 
 /**
@@ -303,5 +309,17 @@ object Exercise58 {
   def main(args: Array[String]): Unit = {
     assert(Stream.constant(1).take(3) == Stream(1, 1, 1))
     assert(Stream.constant("foo").take(2) == Stream("foo", "foo"))
+  }
+}
+
+/**
+ * Exercise 5.9: implement Stream.from.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise59 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream.from(0).take(3) == Stream(0, 1, 2))
+    assert(Stream.from(-10).take(3) == Stream(-10, -9, -8))
   }
 }
