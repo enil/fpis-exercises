@@ -161,16 +161,31 @@ case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A] {
  * From Functional Programming in Scala.
  */
 object Stream {
+  /**
+   * From Functional Programming in Scala.
+   */
   def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = {
     lazy val head = hd
     lazy val tail = tl
     Cons(() => head, () => tail)
   }
 
+  /**
+   * From Functional Programming in Scala.
+   */
   def empty[A]: Stream[A] = Empty
 
+  /**
+   * From Functional Programming in Scala.
+   */
   def apply[A](as: A*): Stream[A] =
     if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def constant[A](a: A): Stream[A] =
+    cons(a, constant(a))
 }
 
 /**
@@ -260,7 +275,7 @@ object Exercise56 {
  * @author Emil Nilsson
  */
 object Exercise57 {
-  def main (args: Array[String]) {
+  def main(args: Array[String]) {
     assert(Stream(1, 2, 3).map(_.toString) == Stream("1", "2", "3"))
     assert(Stream(1, 2, 3).map(_ + 1) == Stream(2, 3, 4))
     assert(Empty.map(_.toString) == Empty)
@@ -276,5 +291,17 @@ object Exercise57 {
     assert(Stream(1, 2, 3).flatMap(i => Stream(i, i)) == Stream(1, 1, 2, 2, 3, 3))
     assert(Stream(1, 2, 3).flatMap(_ => Empty) == Empty)
     assert(Empty.flatMap(_ => Empty) == Empty)
+  }
+}
+
+/**
+ * Exercise 5.8: implement Stream.constant.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise58 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream.constant(1).take(3) == Stream(1, 1, 1))
+    assert(Stream.constant("foo").take(2) == Stream("foo", "foo"))
   }
 }
