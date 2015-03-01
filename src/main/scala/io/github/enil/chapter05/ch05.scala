@@ -192,6 +192,12 @@ object Stream {
    */
   def from(n: Int): Stream[Int] =
     cons(n, from(n + 1))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z).map((x: (A, S)) => cons(x._1, unfold(x._2)(f))).getOrElse(empty)
 }
 
 /**
@@ -340,4 +346,31 @@ object Exercise510 {
 
     go(0, 1)
   }
+}
+
+/**
+ * Exercise 5.12: implement fib, from, constant and ones using Stream.unfold.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise512 {
+  def main(args: Array[String]) {
+    assert(fib.take(8) == Stream(0, 1, 1, 2, 3, 5, 8, 13))
+
+    assert(from(0).take(3) == Stream(0, 1, 2))
+    assert(from(-10).take(3) == Stream(-10, -9, -8))
+
+    assert(constant(1).take(3) == Stream(1, 1, 1))
+    assert(constant("foo").take(2) == Stream("foo", "foo"))
+
+    assert(ones.take(3) == Stream(1, 1, 1))
+  }
+
+  def fib = Stream.unfold(0, 1)(s => Some(s._1, (s._2, s._1 + s._2)))
+
+  def from(n: Int) = Stream.unfold(n)(x => Some(x, x + 1))
+
+  def constant[A](a: A) = Stream.unfold()(_ => Some(a, ()))
+
+  def ones = Stream.unfold()(_ => Some(1, ()))
 }
