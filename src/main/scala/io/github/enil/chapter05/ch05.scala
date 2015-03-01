@@ -323,3 +323,21 @@ object Exercise59 {
     assert(Stream.from(-10).take(3) == Stream(-10, -9, -8))
   }
 }
+
+/**
+ * Exercise 5.10: implement fib using Stream.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise510 {
+  def main(args: Array[String]): Unit = {
+    assert(fib.take(8) == Stream(0, 1, 1, 2, 3, 5, 8, 13))
+  }
+
+  def fib: Stream[Int] = {
+    def go(s: (Int, Int)): Stream[Int] =
+      Stream.cons(s._1, go(s._2, s._1 + s._2))
+
+    go(0, 1)
+  }
+}
