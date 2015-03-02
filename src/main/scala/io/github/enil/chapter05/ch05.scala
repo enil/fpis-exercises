@@ -197,7 +197,9 @@ object Stream {
    * @author Emil Nilsson
    */
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
-    f(z).map((x: (A, S)) => cons(x._1, unfold(x._2)(f))).getOrElse(empty)
+    f(z).map { case (a, s) =>
+      cons(a, unfold(s)(f))
+    }.getOrElse(empty)
 }
 
 /**
@@ -366,7 +368,7 @@ object Exercise512 {
     assert(ones.take(3) == Stream(1, 1, 1))
   }
 
-  def fib = Stream.unfold(0, 1)(s => Some(s._1, (s._2, s._1 + s._2)))
+  def fib = Stream.unfold(0, 1) { case(left, right) => Some(left, (right, left + right)) }
 
   def from(n: Int) = Stream.unfold(n)(x => Some(x, x + 1))
 
