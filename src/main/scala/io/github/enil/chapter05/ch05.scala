@@ -182,6 +182,16 @@ sealed trait Stream[+A] {
       case ((Cons(ah, at), Empty)) => Some((Some(ah()), None), (at(), Empty))
       case (Empty, Cons(bh, bt)) => Some((None, Some(bh())), (Empty, bt()))
     }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def tails: Stream[Stream[A]] =
+    Stream.unfold(Option(this)) {
+      case None => None
+      case Some(Empty) => Some(Empty, None)
+      case Some(as@Cons(_, t)) => Some(as, Some(t()))
+    }
 }
 
 /**
@@ -452,5 +462,17 @@ object Exercise513 {
     assert(Stream(1, 2).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (Some(2), Some(4))))
     assert(Stream(1, 2).zipAll(Stream(1)) == Stream((Some(1), Some(1)), (Some(2), None)))
     assert(Stream(1).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (None, Some(4))))
+  }
+}
+
+/**
+ * Exercise 5.15: implement Stream.tails using Stream.unfold.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise515 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).tails == Stream(Stream(1, 2, 3), Stream(2, 3), Stream(3), Stream()))
+    assert(Empty.tails == Stream(Empty))
   }
 }
