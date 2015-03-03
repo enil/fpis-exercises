@@ -135,6 +135,53 @@ sealed trait Stream[+A] {
    */
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight(Stream.empty[B])((h, t) => f(h) append t)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map2[B](f: A => B): Stream[B] =
+    Stream.unfold(this) {
+      case Empty => None
+      case Cons(h, t) => Some(f(h()), t())
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def take2(n: Int): Stream[A] =
+    Stream.unfold((this, n)) {
+      case (Cons(h, t), r) if r > 0 => Some(h(), (t(), r - 1))
+      case _ => None
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def takeWhile2(p: A => Boolean): Stream[A] =
+    Stream.unfold(this) {
+      case Cons(h, t) if p(h()) => Some(h(), t())
+      case _ => None
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def zipWith[B, C](bs: Stream[B])(f: (A, B) => C): Stream[C] =
+    Stream.unfold(this, bs) {
+      case (Cons(ah, at), Cons(bh, bt)) => Some(f(ah(), bh()), (at(), bt()))
+      case _ => None
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] =
+    Stream.unfold(this, s2) {
+      case (Empty, Empty) => None
+      case ((Cons(ah, at), Cons(bh, bt))) => Some((Some(ah()), Some(bh())), (at(), bt()))
+      case ((Cons(ah, at), Empty)) => Some((Some(ah()), None), (at(), Empty))
+      case (Empty, Cons(bh, bt)) => Some((None, Some(bh())), (Empty, bt()))
+    }
 }
 
 /**
@@ -267,7 +314,7 @@ object Exercise55 {
   def main(args: Array[String]) {
     assert(Stream(1, 2, 3).takeWhile((x: Int) => x < 3) == Stream(1, 2))
     assert(Stream(1, 2, 3).takeWhile((x: Int) => x > 3) == Empty)
-    assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
+    assert(Empty.takeWhile((x: Int) => x < 3) == Empty)
   }
 }
 
@@ -375,4 +422,35 @@ object Exercise512 {
   def constant[A](a: A) = Stream.unfold()(_ => Some(a, ()))
 
   def ones = Stream.unfold()(_ => Some(1, ()))
+}
+
+/**
+ * Exercise 5.13: implement Stream.map, Stream.take, Stream.takeWhile, Stream.zipWith and Stream.zipAll using
+ * Stream.unfold.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise513 {
+  def main(args: Array[String]) {
+    assert(Stream(1, 2, 3).map2(_.toString) == Stream("1", "2", "3"))
+    assert(Stream(1, 2, 3).map2(_ + 1) == Stream(2, 3, 4))
+    assert(Empty.map2(_.toString) == Empty)
+
+    assert(Stream(1, 2, 3).take2(2) == Stream(1, 2))
+    assert(Stream(1, 2, 3).take2(4) == Stream(1, 2, 3))
+    assert(Stream(1, 2, 3).take2(0) == Empty)
+
+    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x < 3) == Stream(1, 2))
+    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x > 3) == Empty)
+    assert(Empty.takeWhile2((x: Int) => x < 3) == Empty)
+
+    assert(Stream(1, 2, 3).zipWith(Stream(4, 5, 6))(_ + _) == Stream(5, 7, 9))
+    assert(Stream("foo", "bar").zipWith(Stream(1, 2, 3))(_ + _.toString) == Stream("foo1", "bar2"))
+    assert(Stream("foo", "bar").zipWith(Empty)(_ + _.toString) == Empty)
+    assert((Empty:Stream[String]).zipWith(Empty)(_ + _.toString) == Empty)
+
+    assert(Stream(1, 2).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (Some(2), Some(4))))
+    assert(Stream(1, 2).zipAll(Stream(1)) == Stream((Some(1), Some(1)), (Some(2), None)))
+    assert(Stream(1).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (None, Some(4))))
+  }
 }
