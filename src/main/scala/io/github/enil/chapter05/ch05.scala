@@ -192,6 +192,16 @@ sealed trait Stream[+A] {
       case Some(Empty) => Some(Empty, None)
       case Some(as@Cons(_, t)) => Some(as, Some(t()))
     }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def startsWith[B >: A](s: Stream[B]): Boolean =
+    zipAll(s) map {
+      case (Some(a), Some(b)) if a == b => true
+      case (Some(_), None) => true
+      case _ => false
+    } forAll identity
 }
 
 /**
@@ -462,6 +472,21 @@ object Exercise513 {
     assert(Stream(1, 2).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (Some(2), Some(4))))
     assert(Stream(1, 2).zipAll(Stream(1)) == Stream((Some(1), Some(1)), (Some(2), None)))
     assert(Stream(1).zipAll(Stream(1, 4)) == Stream((Some(1), Some(1)), (None, Some(4))))
+  }
+}
+
+/**
+ * Exercise 5.14: implement Stream.startsWith.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise514 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).startsWith(Stream(1, 2)) == true)
+    assert(Stream(1, 2).startsWith(Stream(1, 2, 3)) == false)
+    assert(Stream(1, 2, 3).startsWith(Empty) == true)
+    assert(Empty.startsWith(Stream(1)) == false)
+    assert(Empty.startsWith(Empty) == true)
   }
 }
 
