@@ -65,45 +65,46 @@ sealed trait Stream[+A] {
    */
   def toList: List[A] = this match {
     case Empty => Nil
-    case Cons(x, xx) => x() :: xx().toList
+    case Cons(h, t) => h() :: t().toList
   }
 
   /**
    * @author Emil Nilsson
    */
   def take(n: Int): Stream[A] = this match {
-    case Empty => Empty
-    case Cons(x, xx) => if (n > 0) Cons(x, () => xx().take(n - 1)) else Empty
+    case Empty => Stream.empty
+    case Cons(h, t) => if (n > 0) Stream.cons(h(), t().take(n - 1)) else Stream.empty
   }
 
   /**
    * @author Emil Nilsson
    */
   def drop(n: Int): Stream[A] = this match {
-    case Empty => Empty
-    case Cons(x, xx) => if (n > 0) xx().drop(n - 1) else this
+    case Empty => Stream.empty
+    case Cons(h, t) => if (n > 0) t().drop(n - 1) else this
   }
 
   /**
    * @author Emil Nilsson
    */
-  def dropWhile(f: A => Boolean): Stream[A] = this match {
-    case Empty => Empty
-    case Cons(x, xx) => if (f(x())) xx().dropWhile(f) else this
+  def takeWhile(f: A => Boolean): Stream[A] = this match  {
+    case Cons(h, t) if f(h()) => Stream.cons(h(), t().takeWhile(f))
+    case _ => Stream.empty
   }
 
   /**
    * @author Emil Nilsson
    */
   def forAll(p: A => Boolean): Boolean = this match {
+    case Cons(h, t) if p(h()) => t().forAll(p)
+    case Cons(h, t) => false
     case Empty => true
-    case Cons(x, xx) => if (p(x())) xx().forAll(p) else false
   }
 
   /**
    * @author Emil Nilsson
    */
-  def takeWhile(p: A => Boolean): Stream[A] =
+  def takeWhile2(p: A => Boolean): Stream[A] =
     foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else Stream.empty[A])
 
   /**
@@ -157,7 +158,7 @@ sealed trait Stream[+A] {
   /**
    * @author Emil Nilsson
    */
-  def takeWhile2(p: A => Boolean): Stream[A] =
+  def takeWhile3(p: A => Boolean): Stream[A] =
     Stream.unfold(this) {
       case Cons(h, t) if p(h()) => Some(h(), t())
       case _ => None
@@ -299,15 +300,15 @@ object Exercise52 {
 }
 
 /**
- * Exercise 5.3: implement Stream.dropWhile.
+ * Exercise 5.3: implement Stream.takeWhile.
  *
  * @author Emil Nilsson
  */
 object Exercise53 {
   def main(args: Array[String]): Unit = {
-    assert(Stream(1, 2, 3).dropWhile((x: Int) => x < 3) == Stream(3))
-    assert(Stream(1, 2, 3).dropWhile((x: Int) => x > 3) == Stream(1, 2, 3))
-    assert(Empty.dropWhile((x: Int) => x < 3) == Empty)
+    assert(Stream(1, 2, 3).takeWhile((x: Int) => x < 3) == Stream(1, 2))
+    assert(Stream(1, 2, 3).takeWhile((x: Int) => x > 3) == Empty)
+    assert(Empty.takeWhile((x: Int) => x < 3) == Empty)
   }
 }
 
@@ -331,10 +332,10 @@ object Exercise54 {
  * @author Emil Nilsson
  */
 object Exercise55 {
-  def main(args: Array[String]) {
-    assert(Stream(1, 2, 3).takeWhile((x: Int) => x < 3) == Stream(1, 2))
-    assert(Stream(1, 2, 3).takeWhile((x: Int) => x > 3) == Empty)
-    assert(Empty.takeWhile((x: Int) => x < 3) == Empty)
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x < 3) == Stream(1, 2))
+    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x > 3) == Empty)
+    assert(Empty.takeWhile2((x: Int) => x < 3) == Empty)
   }
 }
 
@@ -356,7 +357,7 @@ object Exercise56 {
  * @author Emil Nilsson
  */
 object Exercise57 {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     assert(Stream(1, 2, 3).map(_.toString) == Stream("1", "2", "3"))
     assert(Stream(1, 2, 3).map(_ + 1) == Stream(2, 3, 4))
     assert(Empty.map(_.toString) == Empty)
@@ -423,7 +424,7 @@ object Exercise510 {
  * @author Emil Nilsson
  */
 object Exercise512 {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     assert(fib.take(8) == Stream(0, 1, 1, 2, 3, 5, 8, 13))
 
     assert(from(0).take(3) == Stream(0, 1, 2))
@@ -451,7 +452,7 @@ object Exercise512 {
  * @author Emil Nilsson
  */
 object Exercise513 {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     assert(Stream(1, 2, 3).map2(_.toString) == Stream("1", "2", "3"))
     assert(Stream(1, 2, 3).map2(_ + 1) == Stream(2, 3, 4))
     assert(Empty.map2(_.toString) == Empty)
@@ -460,9 +461,9 @@ object Exercise513 {
     assert(Stream(1, 2, 3).take2(4) == Stream(1, 2, 3))
     assert(Stream(1, 2, 3).take2(0) == Empty)
 
-    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x < 3) == Stream(1, 2))
-    assert(Stream(1, 2, 3).takeWhile2((x: Int) => x > 3) == Empty)
-    assert(Empty.takeWhile2((x: Int) => x < 3) == Empty)
+    assert(Stream(1, 2, 3).takeWhile3((x: Int) => x < 3) == Stream(1, 2))
+    assert(Stream(1, 2, 3).takeWhile3((x: Int) => x > 3) == Empty)
+    assert(Empty.takeWhile3((x: Int) => x < 3) == Empty)
 
     assert(Stream(1, 2, 3).zipWith(Stream(4, 5, 6))(_ + _) == Stream(5, 7, 9))
     assert(Stream("foo", "bar").zipWith(Stream(1, 2, 3))(_ + _.toString) == Stream("foo1", "bar2"))
