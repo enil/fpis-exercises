@@ -203,6 +203,21 @@ sealed trait Stream[+A] {
       case (Some(_), None) => true
       case _ => false
     } forAll identity
+
+  /**
+   * @author Emil Nilsson
+   */
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = {
+    foldRight(Stream(z), z) { case (a, (bs, b)) =>
+      lazy val x = f(a, b)
+      (Stream.cons(x, bs), x)
+    }._1
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def tails2: Stream[Stream[A]] = scanRight(Empty: Stream[A])(Stream.cons(_, _))
 }
 
 /**
@@ -500,5 +515,17 @@ object Exercise515 {
   def main(args: Array[String]): Unit = {
     assert(Stream(1, 2, 3).tails == Stream(Stream(1, 2, 3), Stream(2, 3), Stream(3), Stream()))
     assert(Empty.tails == Stream(Empty))
+  }
+}
+
+/**
+ * Exercise 5.16: implement Stream.scanRight and Stream.tails using Stream.scanRight.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise516 {
+  def main(args: Array[String]): Unit = {
+    assert(Stream(1, 2, 3).tails2 == Stream(Stream(1, 2, 3), Stream(2, 3), Stream(3), Stream()))
+    assert(Empty.tails2 == Stream(Empty))
   }
 }
