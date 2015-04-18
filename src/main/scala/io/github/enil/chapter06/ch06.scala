@@ -90,3 +90,44 @@ object Exercise61 {
     (nn, rng2)
   }
 }
+
+/**
+ * Exercise 6.2: implement double.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise62 {
+  def main(args: Array[String]): Unit = {
+    val rng = SimpleRNG(42)
+
+    val (f1, rng1) = double(rng)
+    assert(f1 near 0.00752483169) //(16159453 % ((2^31)-2)) / ((2^31)-1)
+
+    val (f2, _) = double(rng1)
+    assert(f2 near 0.5967354852) //(1281479696 % ((2^31)-2)) / ((2^31)-1)
+  }
+
+  /**
+   * Copied from Exercise61
+   */
+  def nonNegativeInt(rng: RNG): (Int, RNG) = {
+    val (n, rng2) = rng.nextInt
+    val nn = if (n < 0) -n -1 else n
+    (nn, rng2)
+  }
+
+  def double(rng: RNG): (Double, RNG) = {
+    val (n, rng2) = nonNegativeInt(rng)
+    val f = (n % (Int.MaxValue - 1)).toFloat / Int.MaxValue
+    (f, rng2)
+  }
+
+  /**
+   * Extension to compare two doubles to determine if they are approximately equal.
+   */
+  implicit class DoubleExtensions(val d: Double) {
+    val epsilon = 1e-8
+
+    def near(d2: Double): Boolean = Math.abs(d - d2) < epsilon
+  }
+}
