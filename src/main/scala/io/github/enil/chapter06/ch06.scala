@@ -102,6 +102,16 @@ object Random {
     val (f3, rng3) = double(rng2)
     ((f1, f2, f3), rng3)
   }
+
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    if (count <= 0)
+      (List(), rng)
+    else {
+      val (n1, rng1) = rng.nextInt
+      val (ns, rng2) = ints(count - 1)(rng1)
+      (n1 :: ns, rng2)
+    }
+  }
 }
 
 /**
@@ -204,5 +214,28 @@ object Exercise63 {
     assert(f4 near 0.9386595431) // ((-(-2015756020)-1) % ((2^31)-2)) / ((2^31)-1)
     assert(f5 near 0.8242210927) // (1770001318 % ((2^31)-2)) / ((2^31)-1)
     assert(f6 near 0.9008632316) // ((-(-1934589059)-1) % ((2^31)-2)) / ((2^31)-1)
+  }
+}
+
+/**
+ * Exercise 6.4: implement ints.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise64 {
+  def main(args: Array[String]): Unit = {
+    import Random._
+
+    val rng = SimpleRNG(42)
+
+    val (ns1, rng1) = ints(3)(rng)
+    val (n1, _) = rng1.nextInt
+    assert(ns1 == List(16159453, -1281479697, -340305902))
+    assert(n1 == -2015756020)
+
+    val (ns2, rng2) = ints(0)(rng)
+    val (n2, _) = rng2.nextInt
+    assert(ns2 == List())
+    assert(n2 == 16159453)
   }
 }
