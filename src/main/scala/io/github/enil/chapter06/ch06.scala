@@ -59,43 +59,59 @@ trait RNG {
 /**
  * From Functional Programming in Scala.
  */
-case class SimpleRNG(seed: Long) extends RNG {
-  def nextInt: (Int, RNG) = {
-    val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
-    val nextRNG = SimpleRNG(newSeed)
-    val n = (newSeed >>> 16).toInt
-    (n, nextRNG)
-  }
-}
+object RNG {
+  type Rand[+A] = RNG => (A, RNG)
 
-/**
- * @author Emil Nilsson
- */
-object Random {
+  val int: Rand[Int] = _.nextInt
+
+  def unit[A](a: A): Rand[A] =
+    rng => (a, rng)
+
+  def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    rng => {
+      val (a, rng2) = s(rng)
+      (f(a), rng2)
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (n, rng2) = rng.nextInt
     val nn = if (n < 0) -n -1 else n
     (nn, rng2)
   }
 
+  /**
+   * @author Emil Nilsson
+   */
   def double(rng: RNG): (Double, RNG) = {
     val (n, rng2) = nonNegativeInt(rng)
     val f = (n % (Int.MaxValue - 1)).toFloat / Int.MaxValue
     (f, rng2)
   }
 
+  /**
+   * @author Emil Nilsson
+   */
   def intDouble(rng: RNG): ((Int, Double), RNG) = {
     val (n, rng1) = rng.nextInt
     val (f, rng2) = double(rng1)
     ((n, f), rng2)
   }
 
+  /**
+   * @author Emil Nilsson
+   */
   def doubleInt(rng: RNG): ((Double, Int), RNG) = {
     val (f, rng1) = double(rng)
     val (n, rng2) = rng1.nextInt
     ((f, n), rng2)
   }
 
+  /**
+   * @author Emil Nilsson
+   */
   def double3(rng: RNG): ((Double, Double, Double), RNG) = {
     val (f1, rng1) = double(rng)
     val (f2, rng2) = double(rng1)
@@ -103,6 +119,9 @@ object Random {
     ((f1, f2, f3), rng3)
   }
 
+  /**
+   * @author Emil Nilsson
+   */
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
     if (count <= 0)
       (List(), rng)
@@ -111,6 +130,26 @@ object Random {
       val (ns, rng2) = ints(count - 1)(rng1)
       (n1 :: ns, rng2)
     }
+  }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def double2: RNG.Rand[Double] =
+    RNG.map(nonNegativeInt) { n =>
+      (n % (Int.MaxValue - 1)).toFloat / Int.MaxValue
+    }
+}
+
+/**
+ * From Functional Programming in Scala.
+ */
+case class SimpleRNG(seed: Long) extends RNG {
+  def nextInt: (Int, RNG) = {
+    val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
+    val nextRNG = SimpleRNG(newSeed)
+    val n = (newSeed >>> 16).toInt
+    (n, nextRNG)
   }
 }
 
@@ -135,7 +174,7 @@ object Util {
  */
 object Exercise61 {
   def main (args: Array[String]): Unit = {
-    import Random._
+    import RNG._
 
     val rng = SimpleRNG(42)
 
@@ -154,7 +193,7 @@ object Exercise61 {
  */
 object Exercise62 {
   def main(args: Array[String]): Unit = {
-    import Random._
+    import RNG._
     import Util.DoubleExtensions
 
     val rng = SimpleRNG(42)
@@ -173,7 +212,7 @@ object Exercise62 {
  * @author Emil Nilsson
  */
 object Exercise63 {
-  import Random._
+  import RNG._
   import Util.DoubleExtensions
 
   val rng = SimpleRNG(42)
@@ -224,7 +263,7 @@ object Exercise63 {
  */
 object Exercise64 {
   def main(args: Array[String]): Unit = {
-    import Random._
+    import RNG._
 
     val rng = SimpleRNG(42)
 
@@ -237,5 +276,25 @@ object Exercise64 {
     val (n2, _) = rng2.nextInt
     assert(ns2 == List())
     assert(n2 == 16159453)
+  }
+}
+
+/**
+ * Exercise 6.5: implement double using map.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise65 {
+  def main(args: Array[String]): Unit = {
+    import RNG._
+    import Util.DoubleExtensions
+
+    val rng = SimpleRNG(42)
+
+    val (f1, rng1) = double2(rng)
+    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
+
+    val (f2, _) = double2(rng1)
+    assert(f2 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
   }
 }
