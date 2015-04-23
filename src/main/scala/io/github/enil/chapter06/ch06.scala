@@ -76,6 +76,19 @@ object RNG {
   /**
    * @author Emil Nilsson
    */
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    rng => {
+      val (a, rng2) = ra(rng)
+      val (b, rng3) = rb(rng2)
+      (f(a, b), rng3)
+    }
+
+  def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
+    map2(ra, rb)((_, _))
+
+  /**
+   * @author Emil Nilsson
+   */
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (n, rng2) = rng.nextInt
     val nn = if (n < 0) -n -1 else n
@@ -139,6 +152,12 @@ object RNG {
     RNG.map(nonNegativeInt) { n =>
       (n % (Int.MaxValue - 1)).toFloat / Int.MaxValue
     }
+
+  def randIntDouble: Rand[(Int, Double)] =
+    both(int, double)
+
+  def randDoubleInt: Rand[(Double, Int)] =
+    both(double, int)
 }
 
 /**
@@ -296,5 +315,42 @@ object Exercise65 {
 
     val (f2, _) = double2(rng1)
     assert(f2 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+  }
+}
+
+/**
+ * Exercise 6.6: implement map2.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise66 {
+  import RNG._
+  import Util.DoubleExtensions
+
+  val rng = SimpleRNG(42)
+
+  def main(args: Array[String]): Unit = {
+    testIntDouble
+    testDoubleInt
+  }
+
+  def testIntDouble: Unit = {
+    val ((n1, f1), rng1) = randIntDouble(rng)
+    assert(n1 == 16159453)
+    assert(f1 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+
+    val ((n2, f2), _) = randIntDouble(rng1)
+    assert(n2 == -340305902)
+    assert(f2 near 0.9386595431) // ((-(-2015756020)-1) % ((2^31)-2)) / ((2^31)-1)
+  }
+
+  def testDoubleInt: Unit = {
+    val ((f1, n1), rng1) = randDoubleInt(rng)
+    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
+    assert(n1 == -1281479697)
+
+    val ((f2, n2), _) = randDoubleInt(rng1)
+    assert(f2 near 0.158467284) // ((-(-340305902)-1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == -2015756020)
   }
 }
