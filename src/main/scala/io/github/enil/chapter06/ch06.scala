@@ -83,6 +83,19 @@ object RNG {
       (f(a, b), rng3)
     }
 
+  /**
+   * @author Emil Nilsson
+   */
+  def sequence[A](s: List[Rand[A]]): Rand[List[A]] = {
+    rng => s match {
+      case r :: rs =>
+        val (a, rng2) = r(rng)
+        val (as, rng3) = sequence(rs)(rng2)
+        (a :: as, rng3)
+      case _ => (List(), rng)
+    }
+  }
+
   def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
     map2(ra, rb)((_, _))
 
@@ -158,6 +171,9 @@ object RNG {
 
   def randDoubleInt: Rand[(Double, Int)] =
     both(double, int)
+
+  def randInts(count: Int): Rand[List[Int]] =
+    sequence(List.fill(count)(int))
 }
 
 /**
@@ -352,5 +368,28 @@ object Exercise66 {
     val ((f2, n2), _) = randDoubleInt(rng1)
     assert(f2 near 0.158467284) // ((-(-340305902)-1) % ((2^31)-2)) / ((2^31)-1)
     assert(n2 == -2015756020)
+  }
+}
+
+/**
+ * Exercise 6.7: implement ints using sequence.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise67 {
+  import RNG._
+
+  def main(args: Array[String]): Unit = {
+    val rng = SimpleRNG(42)
+
+    val (ns1, rng1) = randInts(3)(rng)
+    val (n1, _) = rng1.nextInt
+    assert(ns1 == List(16159453, -1281479697, -340305902))
+    assert(n1 == -2015756020)
+
+    val (ns2, rng2) = randInts(0)(rng)
+    val (n2, _) = rng2.nextInt
+    assert(ns2 == List())
+    assert(n2 == 16159453)
   }
 }
