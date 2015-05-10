@@ -96,6 +96,15 @@ object RNG {
     }
   }
 
+  /**
+   * @author Emil Nilsson
+   */
+  def flatMap[A, B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+    rng => {
+      val (a, rng2) = f(rng)
+      g(a)(rng2)
+    }
+
   def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
     map2(ra, rb)((_, _))
 
@@ -174,6 +183,15 @@ object RNG {
 
   def randInts(count: Int): Rand[List[Int]] =
     sequence(List.fill(count)(int))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def nonNegativeIntLessThan(n: Int): Rand[Int] =
+    flatMap(nonNegativeInt) { i =>
+      val mod = i % n
+      if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeIntLessThan(n)
+    }
 }
 
 /**
@@ -391,5 +409,37 @@ object Exercise67 {
     val (n2, _) = rng2.nextInt
     assert(ns2 == List())
     assert(n2 == 16159453)
+  }
+}
+
+/**
+ * Exercise 6.8: implement flatMap and use it to implement nonNegativeIntLessThan.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise68 {
+  import RNG._
+
+  def main(args: Array[String]): Unit = {
+    val rng = MockRNG(List(Int.MaxValue, 1, 2, 3))
+
+    // first value should be rejected
+    val (n1, rng1) = nonNegativeIntLessThan(1000)(rng)
+    val (n2, rng2) = nonNegativeIntLessThan(1000)(rng1)
+    val (n3, _) = rng2.nextInt
+
+    assert(n1 == 1)
+    assert(n2 == 2)
+    assert(n3 == 3)
+  }
+
+  /**
+   * A mock random number generator yielding values from a predefined list of numbers.
+   */
+  case class MockRNG(ints: Seq[Int]) extends RNG {
+    def nextInt: (Int, RNG) = ints match {
+      case h :: t => (h, MockRNG(t))
+      case _ => throw new RuntimeException("Exhausted mock ints")
+    }
   }
 }
