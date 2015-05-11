@@ -207,6 +207,18 @@ case class SimpleRNG(seed: Long) extends RNG {
 }
 
 /**
+ * A mock random number generator yielding values from a predefined list of numbers.
+ *
+ * @author Emil Nilsson
+ */
+case class MockRNG(ints: Seq[Int]) extends RNG {
+  def nextInt: (Int, RNG) = ints match {
+    case h :: t => (h, MockRNG(t))
+    case _ => throw new RuntimeException("Exhausted mock ints")
+  }
+}
+
+/**
  * @author Emil Nilsson
  */
 object Util {
@@ -229,13 +241,18 @@ object Exercise61 {
   def main (args: Array[String]): Unit = {
     import RNG._
 
-    val rng = SimpleRNG(42)
+    val rng = MockRNG(List(-1, -2, 3, 4))
 
     val (n1, rng1) = nonNegativeInt(rng)
-    assert(n1 == 16159453)
+    val (n2, rng2) = nonNegativeInt(rng1)
+    val (n3, rng3) = nonNegativeInt(rng2)
+    // make sure the returned RNG is in the correct state
+    val (n4, _) = rng3.nextInt
 
-    val (n2, _) = nonNegativeInt(rng1)
-    assert(n2 == 1281479696) // -1281479697 - 1
+    assert(n1 == 0) // -(-1) - 1
+    assert(n2 == 1) // -(-2) - 1
+    assert(n3 == 3)
+    assert(n4 == 4)
   }
 }
 
@@ -249,13 +266,16 @@ object Exercise62 {
     import RNG._
     import Util.DoubleExtensions
 
-    val rng = SimpleRNG(42)
+    val rng = MockRNG(List(10000000, -20000000, 30000000))
 
     val (f1, rng1) = double(rng)
-    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
+    val (f2, rng2) = double(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n, _) = rng2.nextInt
 
-    val (f2, _) = double(rng1)
-    assert(f2 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+    assert(f1 near 0.0046566129) // (100000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f2 near 0.0093132253) // ((-(-20000000) - 1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n == 30000000)
   }
 }
 
@@ -268,7 +288,7 @@ object Exercise63 {
   import RNG._
   import Util.DoubleExtensions
 
-  val rng = SimpleRNG(42)
+  val rng = MockRNG(List(10000000, 20000000, 30000000, 40000000, 50000000, 60000000, 70000000))
 
   def main(args: Array[String]): Unit = {
     testIntDouble
@@ -278,34 +298,44 @@ object Exercise63 {
 
   def testIntDouble: Unit = {
     val ((n1, f1), rng1) = intDouble(rng)
-    assert(n1 == 16159453)
-    assert(f1 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+    val ((n2, f2), rng2) = intDouble(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n3, _) = rng2.nextInt
 
-    val ((n2, f2), _) = intDouble(rng1)
-    assert(n2 == -340305902)
-    assert(f2 near 0.9386595431) // ((-(-2015756020)-1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n1 == 10000000)
+    assert(f1 near 0.0093132258) // (20000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == 30000000)
+    assert(f2 near 0.0186264515) // (40000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n3 == 50000000)
   }
 
   def testDoubleInt: Unit = {
     val ((f1, n1), rng1) = doubleInt(rng)
-    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
-    assert(n1 == -1281479697)
+    val ((f2, n2), rng2) = doubleInt(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n3, _) = rng2.nextInt
 
-    val ((f2, n2), _) = doubleInt(rng1)
-    assert(f2 near 0.158467284) // ((-(-340305902)-1) % ((2^31)-2)) / ((2^31)-1)
-    assert(n2 == -2015756020)
+    assert(f1 near 0.0046566129) // (10000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n1 == 20000000)
+
+    assert(f2 near 0.0139698386) // (30000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == 40000000)
+    assert(n3 == 50000000)
   }
 
   def testDouble3: Unit = {
     val ((f1, f2, f3), rng1) = double3(rng)
-    assert(f1 near 0.0075248317) // (16159453 % ((2^31)-2)) / ((2^31)-1)
-    assert(f2 near 0.5967354852) // ((-(-1281479697)-1) % ((2^31)-2)) / ((2^31)-1)
-    assert(f3 near 0.158467284) // ((-(-340305902)-1) % ((2^31)-2)) / ((2^31)-1)
+    val ((f4, f5, f6), rng2) = double3(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n, _) = rng2.nextInt
 
-    val ((f4, f5, f6), _) = double3(rng1)
-    assert(f4 near 0.9386595431) // ((-(-2015756020)-1) % ((2^31)-2)) / ((2^31)-1)
-    assert(f5 near 0.8242210927) // (1770001318 % ((2^31)-2)) / ((2^31)-1)
-    assert(f6 near 0.9008632316) // ((-(-1934589059)-1) % ((2^31)-2)) / ((2^31)-1)
+    assert(f1 near 0.0046566129) // (10000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f2 near 0.0093132258) // (20000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f3 near 0.0139698386) // (30000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f4 near 0.0186264515) // (40000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f5 near 0.0232830644) // (50000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f6 near 0.0279396773) // (60000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n == 70000000)
   }
 }
 
@@ -318,17 +348,21 @@ object Exercise64 {
   def main(args: Array[String]): Unit = {
     import RNG._
 
-    val rng = SimpleRNG(42)
+    val rng = MockRNG(List(1, 2, 3, 4))
 
     val (ns1, rng1) = ints(3)(rng)
+    // make sure the returned RNG is in the correct state
     val (n1, _) = rng1.nextInt
-    assert(ns1 == List(16159453, -1281479697, -340305902))
-    assert(n1 == -2015756020)
+
+    assert(ns1 == List(1, 2, 3))
+    assert(n1 == 4)
 
     val (ns2, rng2) = ints(0)(rng)
+    // make sure the returned RNG is in the correct state
     val (n2, _) = rng2.nextInt
+
     assert(ns2 == List())
-    assert(n2 == 16159453)
+    assert(n2 == 1)
   }
 }
 
@@ -342,13 +376,16 @@ object Exercise65 {
     import RNG._
     import Util.DoubleExtensions
 
-    val rng = SimpleRNG(42)
+    val rng = MockRNG(List(10000000, -20000000, 30000000))
 
     val (f1, rng1) = double2(rng)
-    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
+    val (f2, rng2) = double2(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n, _) = rng2.nextInt
 
-    val (f2, _) = double2(rng1)
-    assert(f2 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+    assert(f1 near 0.0046566129) // (100000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f2 near 0.0093132253) // ((-(-20000000) - 1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n == 30000000)
   }
 }
 
@@ -361,7 +398,7 @@ object Exercise66 {
   import RNG._
   import Util.DoubleExtensions
 
-  val rng = SimpleRNG(42)
+  val rng = MockRNG(List(10000000, 20000000, 30000000, 40000000, 50000000))
 
   def main(args: Array[String]): Unit = {
     testIntDouble
@@ -370,22 +407,29 @@ object Exercise66 {
 
   def testIntDouble: Unit = {
     val ((n1, f1), rng1) = randIntDouble(rng)
-    assert(n1 == 16159453)
-    assert(f1 near 0.5967354852) // (1281479696 % ((2^31)-2)) / ((2^31)-1)
+    val ((n2, f2), rng2) = randIntDouble(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n3, _) = rng2.nextInt
 
-    val ((n2, f2), _) = randIntDouble(rng1)
-    assert(n2 == -340305902)
-    assert(f2 near 0.9386595431) // ((-(-2015756020)-1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n1 == 10000000)
+    assert(f1 near 0.0093132258) // (20000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == 30000000)
+    assert(f2 near 0.0186264515) // (40000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n3 == 50000000)
   }
 
   def testDoubleInt: Unit = {
     val ((f1, n1), rng1) = randDoubleInt(rng)
-    assert(f1 near 0.00752483169) // (16159453 % ((2^31)-2)) / ((2^31)-1)
-    assert(n1 == -1281479697)
+    val ((f2, n2), rng2) = randDoubleInt(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n3, _) = rng2.nextInt
 
-    val ((f2, n2), _) = randDoubleInt(rng1)
-    assert(f2 near 0.158467284) // ((-(-340305902)-1) % ((2^31)-2)) / ((2^31)-1)
-    assert(n2 == -2015756020)
+    assert(f1 near 0.0046566129) // (10000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n1 == 20000000)
+
+    assert(f2 near 0.0139698386) // (30000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == 40000000)
+    assert(n3 == 50000000)
   }
 }
 
@@ -398,17 +442,21 @@ object Exercise67 {
   import RNG._
 
   def main(args: Array[String]): Unit = {
-    val rng = SimpleRNG(42)
+    val rng = MockRNG(List(1, 2, 3, 4))
 
     val (ns1, rng1) = randInts(3)(rng)
+    // make sure the returned RNG is in the correct state
     val (n1, _) = rng1.nextInt
-    assert(ns1 == List(16159453, -1281479697, -340305902))
-    assert(n1 == -2015756020)
+
+    assert(ns1 == List(1, 2, 3))
+    assert(n1 == 4)
 
     val (ns2, rng2) = randInts(0)(rng)
+    // make sure the returned RNG is in the correct state
     val (n2, _) = rng2.nextInt
+
     assert(ns2 == List())
-    assert(n2 == 16159453)
+    assert(n2 == 1)
   }
 }
 
@@ -431,15 +479,5 @@ object Exercise68 {
     assert(n1 == 1)
     assert(n2 == 2)
     assert(n3 == 3)
-  }
-
-  /**
-   * A mock random number generator yielding values from a predefined list of numbers.
-   */
-  case class MockRNG(ints: Seq[Int]) extends RNG {
-    def nextInt: (Int, RNG) = ints match {
-      case h :: t => (h, MockRNG(t))
-      case _ => throw new RuntimeException("Exhausted mock ints")
-    }
   }
 }
