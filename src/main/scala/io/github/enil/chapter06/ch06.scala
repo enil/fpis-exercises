@@ -481,3 +481,31 @@ object Exercise68 {
     assert(n3 == 3)
   }
 }
+
+/**
+ * Exercise 6.9: implement map and map2 using flatMap.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise69 {
+  import RNG.{Rand, flatMap, unit, int}
+
+  def main(args: Array[String]): Unit = {
+    val rng = MockRNG(List(1, 2, 3, 4))
+
+    val (s1, rng1) = map(int)(-_)(rng)
+    val (s2, rng2) = map2(int, int)(_ + _)(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n, _) = rng2.nextInt
+
+    assert(s1 == -1)
+    assert(s2 == 5)
+    assert(n == 4)
+  }
+
+  def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    flatMap(s)(a => unit(f(a)))
+
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap(ra)(a => flatMap(rb)(b => unit(f(a, b))))
+}
