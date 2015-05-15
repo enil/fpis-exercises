@@ -219,6 +219,54 @@ case class MockRNG(ints: Seq[Int]) extends RNG {
 }
 
 /**
+ * From Functional Programming in Scala.
+ */
+case class State[S, +A](run: S => (A, S)) {
+  /**
+   * @author Emil Nilsson
+   */
+  def apply(s: S): (A, S) = run(s)
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map[B](f: A => B): State[S, B] =
+    flatMap(a => State.unit(f(a)))
+
+  /**
+   * @author Emil Nilsson
+   */
+  def flatMap[B](f: A => State[S, B]): State[S, B] =
+    State { s =>
+      val (a, s2) = run(s)
+      f(a)(s2)
+    }
+
+  /**
+   * @author Emil Nilsson
+   */
+  def map2[B, C](rb: State[S, B])(f: (A, B) => C): State[S, C] =
+    flatMap(a => rb.flatMap(b => State.unit(f(a, b))))
+}
+
+/**
+ * @author Emil Nilsson
+ */
+object State {
+  def unit[S, A](a: A): State[S, A] =
+    State { s => (a, s) }
+
+  def sequence[S, A](fs: List[State[S, A]]): State[S, List[A]] =
+    State(s => fs match {
+      case r :: rs =>
+        val (a, s2) = r(s)
+        val (as, s3) = sequence(rs)(s2)
+        (a :: as, s3)
+      case _ => (List(), s)
+    })
+}
+
+/**
  * @author Emil Nilsson
  */
 object Util {
@@ -508,4 +556,121 @@ object Exercise69 {
 
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
     flatMap(ra)(a => flatMap(rb)(b => unit(f(a, b))))
+}
+
+/**
+ * Exercise 6.10: implement unit, map, map2, flatMap and sequence for State.
+ *
+ * Reimplementations of functions generating random numbers are reimplemented for the State class to test the
+ * implementations.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise610 {
+  import Util.DoubleExtensions
+
+  def main(args: Array[String]): Unit = {
+    testNonNegativeInt
+    testDouble
+    testNonNegativeIntLessThan
+    testRandIntDouble
+    testInts
+  }
+
+  def testNonNegativeInt: Unit = {
+    val rng = MockRNG(List(-1, -2, 3, 4))
+
+    val (n1, rng1) = nonNegativeInt(rng)
+    val (n2, rng2) = nonNegativeInt(rng1)
+    val (n3, rng3) = nonNegativeInt(rng2)
+    // make sure the returned RNG is in the correct state
+    val (n4, _) = rng3.nextInt
+
+    assert(n1 == 0) // -(-1) - 1
+    assert(n2 == 1) // -(-2) - 1
+    assert(n3 == 3)
+    assert(n4 == 4)
+  }
+
+  def testDouble: Unit = {
+    val rng = MockRNG(List(10000000, -20000000, 30000000))
+
+    val (f1, rng1) = double(rng)
+    val (f2, rng2) = double(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n, _) = rng2.nextInt
+
+    assert(f1 near 0.0046566129) // (100000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(f2 near 0.0093132253) // ((-(-20000000) - 1) % ((2^31)-2)) / ((2^31)-1)
+    assert(n == 30000000)
+  }
+
+  def testNonNegativeIntLessThan: Unit = {
+       val rng = MockRNG(List(Int.MaxValue, 1, 2, 3))
+
+    // first value should be rejected
+    val (n1, rng1) = nonNegativeIntLessThan(1000)(rng)
+    val (n2, rng2) = nonNegativeIntLessThan(1000)(rng1)
+    val (n3, _) = rng2.nextInt
+
+    assert(n1 == 1)
+    assert(n2 == 2)
+    assert(n3 == 3)
+  }
+
+  def testRandIntDouble: Unit = {
+    val rng = MockRNG(List(10000000, 20000000, 30000000, 40000000, 50000000))
+
+    val ((n1, f1), rng1) = randIntDouble(rng)
+    val ((n2, f2), rng2) = randIntDouble(rng1)
+    // make sure the returned RNG is in the correct state
+    val (n3, _) = rng2.nextInt
+
+    assert(n1 == 10000000)
+    assert(f1 near 0.0093132258) // (20000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n2 == 30000000)
+    assert(f2 near 0.0186264515) // (40000000 % ((2^31)-2)) / ((2^31)-1)
+    assert(n3 == 50000000)
+  }
+
+  def testInts: Unit = {
+    val rng = MockRNG(List(1, 2, 3, 4))
+
+    val (ns1, rng1) = ints(3)(rng)
+    // make sure the returned RNG is in the correct state
+    val (n1, _) = rng1.nextInt
+
+    assert(ns1 == List(1, 2, 3))
+    assert(n1 == 4)
+
+    val (ns2, rng2) = ints(0)(rng)
+    // make sure the returned RNG is in the correct state
+    val (n2, _) = rng2.nextInt
+
+    assert(ns2 == List())
+    assert(n2 == 1)
+  }
+
+  type Rand[A] = State[RNG, A]
+
+  val int: Rand[Int] = State { _.nextInt }
+
+  def nonNegativeInt: Rand[Int] = int.map { i =>
+    if (i < 0) -i - 1 else i
+  }
+
+  def double: Rand[Double] = nonNegativeInt.map { i =>
+    (i % (Int.MaxValue - 1)).toFloat / Int.MaxValue
+  }
+
+  def nonNegativeIntLessThan(n: Int): Rand[Int] = nonNegativeInt.flatMap { i =>
+    val mod = i % n
+    if (i + (n-1) - mod >= 0) State.unit(mod) else nonNegativeIntLessThan(n)
+  }
+
+  def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] = (ra map2 rb)((_, _))
+
+  def randIntDouble: Rand[(Int, Double)] = both(int, double)
+
+  def ints(count: Int): Rand[List[Int]] = State.sequence(List.fill(count)(int))
 }
