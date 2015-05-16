@@ -264,6 +264,24 @@ object State {
         (a :: as, s3)
       case _ => (List(), s)
     })
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+  } yield ()
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  def get[S]: State[S, S] = State(s => (s, s))
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
 }
 
 /**
@@ -673,4 +691,95 @@ object Exercise610 {
   def randIntDouble: Rand[(Int, Double)] = both(int, double)
 
   def ints(count: Int): Rand[List[Int]] = State.sequence(List.fill(count)(int))
+}
+
+/**
+ * Exercise 6.11: implement candy dispenser FSM using State.
+ *
+ * @author Emil Nilsson
+ */
+object Exercise611 {
+  val machine = Machine(locked = true, candies = 5, coins = 0)
+
+  def main(args: Array[String]): Unit = {
+    testBuySome
+    testBuyAll
+  }
+
+  def testBuySome: Unit = {
+    // successfully buys 3 out of 5 candies
+    val input: List[Input] = List(Coin, Turn, Turn, Turn, Coin, Coin, Turn, Coin, Turn, Turn)
+
+    val machine = Machine(locked = true, candies = 5, coins = 0)
+    val ((candies: Int, coins: Int), _) = simulateMachine(input)(machine)
+
+    assert(candies == 2)
+    assert(coins == 3)
+  }
+
+  def testBuyAll: Unit = {
+    // successfully buys all 5 candies
+    val input: List[Input] = List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)
+
+    val machine = Machine(locked = true, candies = 5, coins = 0)
+    val ((candies: Int, coins: Int), _) = simulateMachine(input)(machine)
+
+    assert(candies == 0)
+    assert(coins == 5)
+  }
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] =
+    for {
+      _ <- State.sequence(inputs.map(Machine.process))
+      s <- State.get
+    } yield (s.candies, s.coins)
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  sealed trait Input
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  case object Coin extends Input
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  case object Turn extends Input
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+  /**
+   * From Functional Programming in Scala.
+   */
+  object Machine {
+    /**
+     * @author Emil Nilsson
+     */
+    def process(input: Input): State[Machine, Unit] = input match {
+      case Coin => insertCoin
+      case Turn => turnKnob
+    }
+
+    /**
+     * @author Emil Nilsson
+     */
+    def insertCoin: State[Machine, Unit] = State.modify(s => (s.locked, s.candies) match {
+      case (true, c) if c > 0 => Machine(locked = false, s.candies, coins = s.coins + 1)
+      case _ => s
+    })
+
+    /**
+     * @author Emil Nilsson
+     */
+    def turnKnob: State[Machine, Unit] = State.modify(s => (s.locked, s.candies) match {
+      case (false, c) if c > 0 => Machine(locked = true, candies = s.candies - 1, s.coins)
+      case _ => s
+    })
+  }
 }
